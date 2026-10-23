@@ -1,0 +1,172 @@
+{
+  "project_name": "Ram Pravesh Sahni Portfolio (rpsahnni.dev)",
+  "app_type": "developer_portfolio",
+  "theme": "dark_high_contrast",
+  "identity_and_branding": {
+    "developer_name": "Ram Pravesh Sahni",
+    "handle": "rpsahnni",
+    "domain": "rpsahnni.dev",
+    "roles": [
+      "Backend Engineer",
+      "Full-Stack Developer",
+      "Mobile App Developer",
+      "AI Automation Specialist"
+    ],
+    "location": "Deoghar, Jharkhand, India",
+    "availability": "Available for freelance & full-time projects",
+    "social_links": {
+      "linkedin": "https://www.linkedin.com/in/rp-sahnni",
+      "github": "https://github.com/rpsahnni-creator",
+      "email": "rpsahnni@gmail.com",
+      "phone": "+91 90396 93335",
+      "whatsapp": "https://wa.me/919039693335"
+    },
+    "logo_concept": "Custom RP monogram in glowing SVG geometric line art"
+  },
+  "typography": {
+    "heading_font": "Syne, Plus Jakarta Sans, sans-serif",
+    "body_font": "Plus Jakarta Sans, -apple-system, BlinkMacSystemFont, sans-serif",
+    "code_font": "JetBrains Mono, Fira Code, monospace",
+    "font_size_scale": {
+      "h1_hero": "text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight",
+      "h2_section": "text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight",
+      "h3_card": "text-xl sm:text-2xl font-semibold",
+      "body_text": "text-base text-slate-300 leading-relaxed",
+      "mono_label": "text-xs uppercase tracking-[0.2em] font-mono text-emerald-400"
+    }
+  },
+  "colors": {
+    "bg_primary": "#070A0F",
+    "bg_secondary": "#0D131F",
+    "bg_card": "#111827",
+    "border_subtle": "rgba(255, 255, 255, 0.08)",
+    "border_emerald": "rgba(16, 185, 129, 0.3)",
+    "accent_primary": "#10B981",
+    "accent_primary_hover": "#059669",
+    "accent_secondary": "#F59E0B",
+    "text_bright": "#F9FAFB",
+    "text_muted": "#9CA3AF",
+    "text_emerald": "#34D399"
+  },
+  "visual_enhancers": {
+    "effects": [
+      "1px subtle borders with hover glow effect",
+      "Glassmorphism headers with backdrop-blur-xl bg-black/60",
+      "Grain overlay texture at 3% opacity to remove digital flatness",
+      "Interactive dot-matrix/grid background in hero section",
+      "Terminal-inspired inspect drawers and code tags"
+    ]
+  },
+  "sections": [
+    {
+      "name": "Navigation Header",
+      "description": "Sticky top bar with RP Monogram logo, smooth anchor links (Projects, Stack, AI Workflows, Services, Contact), status pulse badge, and Contact CTA button.",
+      "data_test_ids": ["nav-logo", "nav-projects-link", "nav-stack-link", "nav-ai-link", "nav-services-link", "nav-contact-link", "nav-cta-button"]
+    },
+    {
+      "name": "Kinetic Hero",
+      "description": "Line-by-line staggered text reveal, large Ram Pravesh Sahni headline, dynamic auto-rotating role typewriter, live 'Available for Hire' badge with pulsing green light, quick metric pills (3+ Yrs Exp, 15+ Delivered Projects, 99.9% API Uptime), direct CTAs to 'Explore Projects' and 'Hire Me'.",
+      "data_test_ids": ["hero-name", "hero-role-typewriter", "hero-status-badge", "hero-cta-projects", "hero-cta-contact"]
+    },
+    {
+      "name": "Projects Showcase (Core Ask)",
+      "description": "Interactive project gallery with category filters (All, Backend, Web, Mobile, AI & Automation). 6 featured project cards with numbered index (01 - 06), tech stack pills, architecture highlights, live preview modal / code breakdown trigger.",
+      "projects_list": [
+        {
+          "title": "Billing & Invoice API",
+          "category": "Backend",
+          "tags": ["Django", "PostgreSQL", "Docker", "AWS"],
+          "desc": "High-concurrency microservice handling secure invoice generation, PDF exports, and payment gateway webhooks."
+        },
+        {
+          "title": "Realtime Chat Service",
+          "category": "Backend",
+          "tags": ["Golang", "Redis", "PostgreSQL"],
+          "desc": "Ultra-low latency WebSocket chat server supporting 10k+ concurrent connections with pub/sub architecture."
+        },
+        {
+          "title": "Business Dashboard",
+          "category": "Web",
+          "tags": ["React", "TypeScript", "Tailwind CSS"],
+          "desc": "Analytics & financial management portal featuring real-time telemetry, dark theme visuals, and exportable reports."
+        },
+        {
+          "title": "Delivery Tracking App",
+          "category": "Mobile",
+          "tags": ["Flutter", "Firebase", "FastAPI"],
+          "desc": "Cross-platform mobile application with live GPS driver movement, push alerts, and order lifecycle management."
+        },
+        {
+          "title": "Lead-to-WhatsApp Automation",
+          "category": "AI & Automation",
+          "tags": ["n8n", "OpenAI", "Webhooks"],
+          "desc": "Zero-human workflow routing incoming lead forms through AI qualification directly into WhatsApp conversations."
+        },
+        {
+          "title": "Support Chatbot with RAG",
+          "category": "AI & Automation",
+          "tags": ["FastAPI", "LangChain", "PostgreSQL Vector"],
+          "desc": "Context-aware AI knowledge assistant fetching dynamic company docs via retrieval-augmented generation."
+        }
+      ],
+      "data_test_ids": ["project-filter-all", "project-filter-backend", "project-filter-web", "project-filter-mobile", "project-filter-ai", "project-card-1", "project-card-2", "project-card-3", "project-card-4", "project-card-5", "project-card-6"]
+    },
+    {
+      "name": "Tech Stack Section",
+      "description": "Grouped grid of technologies organized into 6 clear tabs/cards: Backend, Databases, Frontend, Mobile, Cloud & DevOps, AI & Automation. Includes skill depth indicator and interactive tech pill hover states.",
+      "data_test_ids": ["tech-group-backend", "tech-group-databases", "tech-group-frontend", "tech-group-mobile", "tech-group-cloud", "tech-group-ai"]
+    },
+    {
+      "name": "AI Automation Workflows",
+      "description": "Interactive n8n flow visualizer showing step-by-step data movement (Trigger → n8n workflow → AI Model → Your Data → Action) with 4 clickable use cases and live step preview.",
+      "data_test_ids": ["ai-workflow-container", "ai-workflow-trigger-btn", "ai-usecase-1", "ai-usecase-2", "ai-usecase-3", "ai-usecase-4"]
+    },
+    {
+      "name": "Services Offered",
+      "description": "4 strategic service cards: 1) Backend & APIs, 2) Websites & Web Apps, 3) Mobile Apps, 4) Cloud & DevOps. Details deliverable timeline, stack used, and direct enquiry trigger.",
+      "data_test_ids": ["service-backend", "service-web", "service-mobile", "service-devops"]
+    },
+    {
+      "name": "Editorial Marquee Banner",
+      "description": "Continuous slow-moving ticker displaying key values: FULL-STACK DEVELOPMENT • HIGH PERFORMANCE APIS • AI WORKFLOW AUTOMATION • FLUTTER MOBILE APPS • DEOGHAR TO GLOBAL",
+      "data_test_ids": ["ticker-marquee"]
+    },
+    {
+      "name": "Contact & Enquiry Section",
+      "description": "Working contact form submitting to FastAPI backend (/api/contact) with toast notifications, paired with quick contact cards (Email, Phone, WhatsApp, Deoghar Location).",
+      "data_test_ids": ["contact-form", "contact-name-input", "contact-email-input", "contact-message-input", "contact-submit-button", "contact-whatsapp-link", "contact-email-link"]
+    },
+    {
+      "name": "Footer",
+      "description": "Minimalist technical footer with RP monogram, social icons, copyright notice, and scroll-to-top button.",
+      "data_test_ids": ["footer-copyright", "footer-back-to-top"]
+    }
+  ],
+  "media_and_assets": {
+    "dark_code_bg": "https://images.unsplash.com/photo-1759661881353-5b9cc55e1cf4?crop=entropy&cs=srgb&fm=jpg&q=85",
+    "matrix_lines_bg": "https://images.pexels.com/photos/26765065/pexels-photo-26765065.png?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+    "binary_data_bg": "https://images.pexels.com/photos/9951077/pexels-photo-9951077.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+  },
+  "motion_and_interactions": {
+    "library": "framer-motion",
+    "smooth_scroll": "lenis",
+    "animations": {
+      "fade_in_up": "Initial y: 20, opacity: 0; animate to y: 0, opacity: 1 over 0.5s easeOut",
+      "stagger_children": "staggerChildren: 0.1s for cards and list items",
+      "hover_card_lift": "whileHover: { y: -6, transition: { duration: 0.2 } }",
+      "button_press": "whileTap: { scale: 0.97 }"
+    }
+  },
+  "accessibility": {
+    "contrast_ratio": "APCA AA compliant, min 4.5:1 text contrast against dark backgrounds",
+    "focus_rings": "focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none",
+    "reduced_motion": "Respects prefers-reduced-motion CSS query"
+  },
+  "instructions_to_main_agent": [
+    "Ensure all interactive elements carry clear kebab-case data-testid attributes.",
+    "Do NOT use generic Inter font for main headings; stick to Syne / Plus Jakarta Sans.",
+    "Maintain high dark mode contrast; text must remain crisp and readable against deep charcoal and black backgrounds.",
+    "Wire up the contact form to the FastAPI backend at /api/contact and show a Sonner toast notification on success.",
+    "Keep smooth motion natural with Lenis and Framer Motion stagger animations."
+  ]
+}

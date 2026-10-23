@@ -1,0 +1,11 @@
+node_modules/
+build/
+dist/
+.env
+*.log
+__pycache__/
+.pytest_cache/
+.venv/
+/tmp/
+.emergent/
+memory/
