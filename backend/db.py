@@ -66,9 +66,17 @@ CREATE TABLE IF NOT EXISTS pageviews (
     path TEXT NOT NULL,
     sid TEXT NOT NULL,
     ref TEXT NOT NULL DEFAULT '',
+    ua TEXT NOT NULL DEFAULT '',
     at TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_pageviews_at ON pageviews (at);
+
+CREATE TABLE IF NOT EXISTS rate_hits (
+    id BIGSERIAL PRIMARY KEY,
+    ip TEXT NOT NULL,
+    at DOUBLE PRECISION NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_rate_hits_ip_at ON rate_hits (ip, at);
 
 CREATE TABLE IF NOT EXISTS files (
     id TEXT PRIMARY KEY,
@@ -77,6 +85,9 @@ CREATE TABLE IF NOT EXISTS files (
     data BYTEA NOT NULL,
     created_at TEXT NOT NULL
 );
+
+-- Safe to re-run: adds columns introduced after a table already existed.
+ALTER TABLE pageviews ADD COLUMN IF NOT EXISTS ua TEXT NOT NULL DEFAULT '';
 """
 
 

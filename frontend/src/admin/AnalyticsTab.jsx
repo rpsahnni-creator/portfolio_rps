@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { BarChart3, Eye, Inbox, Users } from "lucide-react";
+import { BarChart3, Eye, Inbox, Monitor, Users } from "lucide-react";
 import { adminApi, fmtErr } from "./api";
 
 export default function AnalyticsTab() {
   const [data, setData] = useState(null);
 
   useEffect(() => {
-    adminApi.get("/admin/analytics").then((r) => setData(r.data)).catch((e) => { toast.error(fmtErr(e)); setData({ days: [], topReferrers: [] }); });
+    adminApi.get("/admin/analytics").then((r) => setData(r.data)).catch((e) => { toast.error(fmtErr(e)); setData({ days: [], topReferrers: [], devices: [], browsers: [] }); });
   }, []);
 
   if (!data) return <p className="font-mono text-xs text-slate-500">loading…</p>;
@@ -47,16 +47,43 @@ export default function AnalyticsTab() {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-white/10 bg-panel p-6">
-        <p className="mb-4 font-mono text-[11px] uppercase tracking-[0.15em] text-slate-500">Top referrers</p>
-        {data.topReferrers.length === 0 && <p className="font-mono text-xs text-slate-600">Abhi koi data nahi.</p>}
-        <div className="grid gap-2">
-          {data.topReferrers.map((r) => (
-            <div key={r.source} className="flex items-center justify-between border-b border-white/5 pb-2 text-sm">
-              <span className="text-slate-300">{r.source}</span>
-              <span className="font-mono text-xs text-emerald-400">{r.count}</span>
+      <div className="grid gap-6 sm:grid-cols-2">
+        <div className="rounded-2xl border border-white/10 bg-panel p-6">
+          <p className="mb-4 font-mono text-[11px] uppercase tracking-[0.15em] text-slate-500">Top referrers</p>
+          {data.topReferrers.length === 0 && <p className="font-mono text-xs text-slate-600">Abhi koi data nahi.</p>}
+          <div className="grid gap-2">
+            {data.topReferrers.map((r) => (
+              <div key={r.source} className="flex items-center justify-between border-b border-white/5 pb-2 text-sm">
+                <span className="text-slate-300">{r.source}</span>
+                <span className="font-mono text-xs text-emerald-400">{r.count}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-white/10 bg-panel p-6">
+          <p className="mb-4 flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.15em] text-slate-500">
+            <Monitor size={14} className="text-emerald-400" /> Devices &amp; browsers
+          </p>
+          {(data.devices || []).length === 0 && <p className="font-mono text-xs text-slate-600">Abhi koi data nahi.</p>}
+          <div className="grid gap-2">
+            {(data.devices || []).map((d) => (
+              <div key={d.name} className="flex items-center justify-between border-b border-white/5 pb-2 text-sm">
+                <span className="text-slate-300">{d.name}</span>
+                <span className="font-mono text-xs text-emerald-400">{d.count}</span>
+              </div>
+            ))}
+          </div>
+          {(data.browsers || []).length > 0 && (
+            <div className="mt-4 grid gap-2">
+              {data.browsers.map((b) => (
+                <div key={b.name} className="flex items-center justify-between border-b border-white/5 pb-2 text-sm">
+                  <span className="text-slate-500">{b.name}</span>
+                  <span className="font-mono text-xs text-slate-400">{b.count}</span>
+                </div>
+              ))}
             </div>
-          ))}
+          )}
         </div>
       </div>
     </div>

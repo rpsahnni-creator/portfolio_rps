@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Quote, Star } from "lucide-react";
 import { useContent } from "../content";
@@ -9,13 +9,13 @@ const ease = [0.22, 1, 0.36, 1];
 export default function Testimonials() {
   const { testimonials } = useContent();
   const [i, setI] = useState(0);
-  const next = () => setI((n) => (n + 1) % testimonials.length);
+  const next = useCallback(() => setI((n) => (n + 1) % testimonials.length), [testimonials.length]);
   const prev = () => setI((n) => (n - 1 + testimonials.length) % testimonials.length);
 
   useEffect(() => {
     const t = setInterval(next, 6000);
     return () => clearInterval(t);
-  }, []);
+  }, [next]);
 
   const q = testimonials[i % testimonials.length];
 

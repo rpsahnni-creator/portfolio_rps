@@ -43,7 +43,7 @@ export default function ProjectModal({ p, onClose }) {
             </button>
 
             <div className="relative mb-6 h-44 overflow-hidden rounded-xl border border-white/10">
-              <img src={p.img} alt="" className="absolute inset-0 h-full w-full object-cover" />
+              <img src={p.img} alt="" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-[rgba(7,10,15,0.85)] via-transparent to-transparent" aria-hidden="true" />
               <span className="absolute bottom-2 right-4 font-display text-6xl font-extrabold text-[rgba(255,255,255,0.2)]" aria-hidden="true">
                 {p.n}

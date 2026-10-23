@@ -17,9 +17,11 @@ from datetime import datetime, timezone, timedelta
 from html import escape
 from html.parser import HTMLParser
 from urllib.parse import urlparse
+import io
 import aiosmtplib
 import bcrypt
 import jwt
+from PIL import Image
 
 from db import init_pool, init_schema, close_pool, get_pool
 
@@ -483,21 +485,44 @@ class TrackIn(BaseModel):
 
 
 @api_router.post("/track")
-async def track_view(t: TrackIn):
+async def track_view(t: TrackIn, request: Request):
     if not t.path.startswith("/"):
         raise HTTPException(status_code=400, detail="bad path")
     pool = get_pool()
+    ua = request.headers.get("user-agent", "")[:300]
     await pool.execute(
-        "INSERT INTO pageviews (id, path, sid, ref, at) VALUES ($1,$2,$3,$4,$5)",
-        str(uuid.uuid4()), t.path, t.sid, t.ref[:300], datetime.now(timezone.utc).isoformat(),
+        "INSERT INTO pageviews (id, path, sid, ref, ua, at) VALUES ($1,$2,$3,$4,$5,$6)",
+        str(uuid.uuid4()), t.path, t.sid, t.ref[:300], ua, datetime.now(timezone.utc).isoformat(),
     )
     return {"status": "ok"}
+
+
+def _device_family(ua: str) -> str:
+    u = (ua or "").lower()
+    if "ipad" in u or "tablet" in u:
+        return "Tablet"
+    if "mobi" in u or "iphone" in u or "android" in u:
+        return "Mobile"
+    return "Desktop"
+
+
+def _browser_family(ua: str) -> str:
+    u = (ua or "").lower()
+    if "edg/" in u:
+        return "Edge"
+    if "chrome/" in u and "chromium" not in u:
+        return "Chrome"
+    if "firefox/" in u:
+        return "Firefox"
+    if "safari/" in u and "chrome/" not in u:
+        return "Safari"
+    return "Other"
 
 
 @api_router.get("/admin/analytics")
 async def admin_analytics(admin=Depends(get_current_admin)):
     pool = get_pool()
-    views = [dict(r) for r in await pool.fetch("SELECT sid, ref, at FROM pageviews")]
+    views = [dict(r) for r in await pool.fetch("SELECT sid, ref, ua, at FROM pageviews")]
     enqs = [dict(r) for r in await pool.fetch("SELECT created_at FROM enquiries")]
     now = datetime.now(timezone.utc)
     days = []
@@ -509,12 +534,18 @@ async def admin_analytics(admin=Depends(get_current_admin)):
             "enquiries": sum(1 for e in enqs if str(e.get("created_at", "")).startswith(day)),
         })
     refs = {}
+    devices = {}
+    browsers = {}
     for v in views:
         r = v.get("ref") or ""
         host = "Direct"
         if r:
             host = urlparse(r).hostname or "Direct"
         refs[host] = refs.get(host, 0) + 1
+        d = _device_family(v.get("ua", ""))
+        b = _browser_family(v.get("ua", ""))
+        devices[d] = devices.get(d, 0) + 1
+        browsers[b] = browsers.get(b, 0) + 1
     top = sorted(refs.items(), key=lambda x: -x[1])[:5]
     return {
         "totalViews": len(views),
@@ -522,9 +553,27 @@ async def admin_analytics(admin=Depends(get_current_admin)):
         "totalEnquiries": len(enqs),
         "days": days,
         "topReferrers": [{"source": k, "count": c} for k, c in top],
+        "devices": sorted(({"name": k, "count": c} for k, c in devices.items()), key=lambda x: -x["count"]),
+        "browsers": sorted(({"name": k, "count": c} for k, c in browsers.items()), key=lambda x: -x["count"]),
     }
 
 # ---------------- Files (images + resume) ----------------
+
+def _optimize_image(data: bytes, max_dim: int = 1920, quality: int = 82) -> bytes:
+    """Re-encode to WebP and cap the longest side, so uploads from a phone/DSLR
+    don't ship multi-MB images to every visitor."""
+    img = Image.open(io.BytesIO(data))
+    img.load()
+    if img.mode == "P":
+        img = img.convert("RGBA" if "transparency" in img.info else "RGB")
+    elif img.mode not in ("RGB", "RGBA", "L"):
+        img = img.convert("RGB")
+    if max(img.size) > max_dim:
+        img.thumbnail((max_dim, max_dim), Image.LANCZOS)
+    out = io.BytesIO()
+    img.save(out, format="WEBP", quality=quality, method=6)
+    return out.getvalue()
+
 
 @api_router.post("/admin/files")
 async def admin_upload_file(file: UploadFile = File(...), admin=Depends(get_current_admin)):
@@ -533,11 +582,15 @@ async def admin_upload_file(file: UploadFile = File(...), admin=Depends(get_curr
         raise HTTPException(status_code=413, detail="File too large (max 5 MB)")
     if not (file.content_type or "").startswith("image/"):
         raise HTTPException(status_code=400, detail="Only image uploads allowed here")
+    try:
+        data = _optimize_image(data)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Could not read this image file")
     pool = get_pool()
     fid = str(uuid.uuid4())
     await pool.execute(
         "INSERT INTO files (id, filename, content_type, data, created_at) VALUES ($1,$2,$3,$4,$5)",
-        fid, file.filename, file.content_type, data, datetime.now(timezone.utc).isoformat(),
+        fid, file.filename, "image/webp", data, datetime.now(timezone.utc).isoformat(),
     )
     return {"id": fid, "url": f"/api/files/{fid}"}
 
@@ -678,17 +731,16 @@ async def send_email(*, to: str, subject: str, html: str, reply_to: str | None =
         raise HTTPException(status_code=502, detail="Failed to send email")
 
 
-_hits: dict[str, list[float]] = {}
-
-
-def _rate_ok(ip: str) -> bool:
+async def _rate_ok(ip: str) -> bool:
+    # DB-backed so the limit holds across worker processes/restarts, not just in one process's memory.
+    pool = get_pool()
     now = time.time()
-    window = [t for t in _hits.get(ip, []) if now - t < 600]
-    if len(window) >= 5:
-        _hits[ip] = window
+    cutoff = now - 600
+    count = await pool.fetchval("SELECT count(*) FROM rate_hits WHERE ip=$1 AND at>$2", ip, cutoff)
+    if count >= 5:
         return False
-    window.append(now)
-    _hits[ip] = window
+    await pool.execute("INSERT INTO rate_hits (ip, at) VALUES ($1,$2)", ip, now)
+    await pool.execute("DELETE FROM rate_hits WHERE ip=$1 AND at<=$2", ip, cutoff)
     return True
 
 
@@ -706,7 +758,7 @@ async def root():
 @api_router.post("/contact")
 async def create_enquiry(payload: ContactIn, request: Request):
     ip = get_client_ip(request)
-    if not _rate_ok(ip):
+    if not await _rate_ok(ip):
         raise HTTPException(status_code=429, detail="Too many messages. Please try again later.")
 
     pool = get_pool()
