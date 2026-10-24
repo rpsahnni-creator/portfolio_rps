@@ -29,6 +29,10 @@ export default function Admin() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
+    document.documentElement.classList.toggle("dark", localStorage.getItem("theme") !== "light");
+  }, []);
+
+  useEffect(() => {
     adminApi.get("/auth/me").then((r) => setUser(r.data)).catch(() => setUser(false));
   }, []);
 

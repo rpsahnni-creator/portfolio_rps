@@ -14,14 +14,42 @@
         --sl-100: #1e293b;
         --sl-200: #334155;
         --sl-300: #475569;
-        --sl-400: #64748b;
-        --sl-500: #64748b;
-        --sl-600: #94a3b8;
+        --sl-400: #526077;
+        --sl-500: #5b6a80;
+        --sl-600: #6b7a90;
         --sl-700: #cbd5e1;
         --c-emerald-200: #047857;
-        --c-emerald-300: #059669;
+        --c-emerald-300: #047857;
         --c-emerald-400: #047857;
         --c-amber-400: #b45309;
+        --c-scroll-thumb: #cbd5e1;
+        --c-selection-fg: #0f172a;
+
+        --background: 210 25% 97%;
+        --foreground: 222 47% 11%;
+        --card: 0 0% 100%;
+        --card-foreground: 222 47% 11%;
+        --popover: 0 0% 100%;
+        --popover-foreground: 222 47% 11%;
+        --primary: 160 84% 39%;
+        --primary-foreground: 222 47% 6%;
+        --secondary: 214 32% 93%;
+        --secondary-foreground: 222 47% 11%;
+        --muted: 214 32% 93%;
+        --muted-foreground: 215 16% 38%;
+        --accent: 214 32% 93%;
+        --accent-foreground: 222 47% 11%;
+        --destructive: 0 72% 46%;
+        --destructive-foreground: 210 40% 98%;
+        --border: 214 32% 86%;
+        --input: 214 32% 86%;
+        --ring: 160 84% 32%;
+        --radius: 0.75rem;
+    }
+
+    .dark {
+        --c-scroll-thumb: #1f2937;
+        --c-selection-fg: #f8fafc;
 
         --background: 222 47% 4%;
         --foreground: 210 40% 96%;
@@ -29,8 +57,6 @@
         --card-foreground: 210 40% 96%;
         --popover: 220 39% 8%;
         --popover-foreground: 210 40% 96%;
-        --primary: 160 84% 39%;
-        --primary-foreground: 222 47% 6%;
         --secondary: 221 30% 14%;
         --secondary-foreground: 210 40% 96%;
         --muted: 221 30% 14%;
@@ -38,14 +64,10 @@
         --accent: 221 30% 14%;
         --accent-foreground: 210 40% 96%;
         --destructive: 0 84% 60%;
-        --destructive-foreground: 210 40% 98%;
         --border: 220 20% 16%;
         --input: 220 20% 16%;
         --ring: 160 84% 50%;
-        --radius: 0.75rem;
-    }
 
-    .dark {
         --c-bg: #070a0f;
         --c-panel: #0d131f;
         --c-white: 255 255 255;
@@ -80,11 +102,11 @@
 
     ::selection {
         background: rgba(16, 185, 129, 0.35);
-        color: #f8fafc;
+        color: var(--c-selection-fg);
     }
 
     :focus-visible {
-        outline: 2px solid #34d399;
+        outline: 2px solid var(--c-emerald-400);
         outline-offset: 3px;
     }
 
@@ -95,7 +117,7 @@
         background: var(--c-bg);
     }
     ::-webkit-scrollbar-thumb {
-        background: #1f2937;
+        background: var(--c-scroll-thumb);
         border-radius: 8px;
     }
     ::-webkit-scrollbar-thumb:hover {
@@ -118,6 +140,25 @@
 
 .text-glow {
     text-shadow: 0 0 32px rgba(52, 211, 153, 0.45);
+}
+
+:root:not(.dark) .text-glow {
+    text-shadow: none;
+}
+
+/* emerald-400 is a dark text colour in light mode; keep it bright when used as a fill */
+:root:not(.dark) .bg-emerald-400,
+:root:not(.dark) .group:hover .group-hover\:bg-emerald-400 {
+    background-color: #10b981;
+}
+
+:root:not(.dark) .border-emerald-400,
+:root:not(.dark) .group:hover .group-hover\:border-emerald-400 {
+    border-color: #10b981;
+}
+
+:root:not(.dark) .hover\:bg-emerald-400:hover {
+    background-color: #34d399;
 }
 
 @media (prefers-reduced-motion: reduce) {

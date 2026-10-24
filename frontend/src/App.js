@@ -16,6 +16,7 @@ import Services from "@/components/Services";
 import Testimonials from "@/components/Testimonials";
 import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
+import ChatWidget from "@/components/ChatWidget";
 import Admin from "@/pages/Admin";
 
 function Intro() {
@@ -79,11 +80,24 @@ function Portfolio() {
         <Contact />
       </main>
       <Footer />
+      <ChatWidget />
     </div>
   );
 }
 
+function useHtmlTheme() {
+  const read = () => (document.documentElement.classList.contains("dark") ? "dark" : "light");
+  const [theme, setTheme] = useState(read);
+  useEffect(() => {
+    const obs = new MutationObserver(() => setTheme(read()));
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    return () => obs.disconnect();
+  }, []);
+  return theme;
+}
+
 export default function App() {
+  const theme = useHtmlTheme();
   return (
     <ContentProvider>
       <BrowserRouter>
@@ -92,7 +106,7 @@ export default function App() {
           <Route path="/admin" element={<Admin />} />
         </Routes>
       </BrowserRouter>
-      <Toaster theme="dark" position="bottom-right" richColors />
+      <Toaster theme={theme}position="bottom-right" richColors />
     </ContentProvider>
   );
 }

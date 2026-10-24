@@ -18,6 +18,7 @@ from html import escape
 from html.parser import HTMLParser
 from urllib.parse import urlparse
 import io
+import httpx
 import aiosmtplib
 import bcrypt
 import jwt
@@ -731,17 +732,198 @@ async def send_email(*, to: str, subject: str, html: str, reply_to: str | None =
         raise HTTPException(status_code=502, detail="Failed to send email")
 
 
-async def _rate_ok(ip: str) -> bool:
+async def _rate_ok(ip: str, kind: str = "contact", limit: int = 5, window: int = 600) -> bool:
     # DB-backed so the limit holds across worker processes/restarts, not just in one process's memory.
     pool = get_pool()
     now = time.time()
-    cutoff = now - 600
-    count = await pool.fetchval("SELECT count(*) FROM rate_hits WHERE ip=$1 AND at>$2", ip, cutoff)
-    if count >= 5:
+    cutoff = now - window
+    count = await pool.fetchval(
+        "SELECT count(*) FROM rate_hits WHERE ip=$1 AND kind=$2 AND at>$3", ip, kind, cutoff
+    )
+    if count >= limit:
         return False
-    await pool.execute("INSERT INTO rate_hits (ip, at) VALUES ($1,$2)", ip, now)
-    await pool.execute("DELETE FROM rate_hits WHERE ip=$1 AND at<=$2", ip, cutoff)
+    await pool.execute("INSERT INTO rate_hits (ip, kind, at) VALUES ($1,$2,$3)", ip, kind, now)
+    await pool.execute("DELETE FROM rate_hits WHERE ip=$1 AND kind=$2 AND at<=$3", ip, kind, cutoff)
     return True
+
+
+# ---------------- Chatbot ----------------
+
+CONTACT_EMAIL = "rpsahnni@gmail.com"
+
+CHAT_PROVIDER = os.environ.get("CHAT_PROVIDER", "").strip().lower()
+ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "").strip()
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "").strip()
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "").strip()
+
+ANTHROPIC_CHAT_MODEL = os.environ.get("ANTHROPIC_CHAT_MODEL", "claude-sonnet-5-5")
+OPENAI_CHAT_MODEL = os.environ.get("OPENAI_CHAT_MODEL", "gpt-4o-mini")
+GEMINI_CHAT_MODEL = os.environ.get("GEMINI_CHAT_MODEL", "gemini-3.5-flash")
+
+_CHAT_PROVIDER_KEYS = {"anthropic": ANTHROPIC_API_KEY, "openai": OPENAI_API_KEY, "gemini": GEMINI_API_KEY}
+
+
+def _active_chat_provider() -> str | None:
+    if CHAT_PROVIDER in _CHAT_PROVIDER_KEYS and _CHAT_PROVIDER_KEYS[CHAT_PROVIDER]:
+        return CHAT_PROVIDER
+    for name in ("anthropic", "openai", "gemini"):
+        if _CHAT_PROVIDER_KEYS[name]:
+            return name
+    return None
+
+
+class ChatMessage(BaseModel):
+    role: str = Field(pattern="^(user|assistant)$")
+    content: str = Field(min_length=1, max_length=4000)
+
+
+class ChatIn(BaseModel):
+    message: str = Field(min_length=1, max_length=1500)
+    history: list[ChatMessage] = Field(default_factory=list, max_length=12)
+
+
+async def _build_chat_system_prompt() -> str:
+    pool = get_pool()
+    proj_rows = await pool.fetch(
+        "SELECT title, cat, description, tech FROM projects ORDER BY sort_order ASC LIMIT 20"
+    )
+    skill_rows = await pool.fetch("SELECT name, items FROM skills ORDER BY sort_order ASC LIMIT 20")
+
+    projects_txt = "\n".join(
+        f"- {r['title']} ({r['cat']}): {r['description']} [tech: {', '.join(json.loads(r['tech'] or '[]'))}]"
+        for r in proj_rows
+    ) or "No projects listed yet."
+
+    skills_txt = "\n".join(
+        f"- {r['name']}: {', '.join(json.loads(r['items'] or '[]'))}" for r in skill_rows
+    ) or "No skills listed yet."
+
+    services_txt = (
+        "- Backend & APIs: Secure, well-documented REST APIs/services in Django, FastAPI, Go or Node.js, "
+        "backed by PostgreSQL or Oracle.\n"
+        "- Websites & Web Apps: Fast, SEO-friendly sites and dashboards in React, Next.js and TypeScript, "
+        "deployable on Vercel or AWS.\n"
+        "- Mobile Apps: One codebase for Android and iOS with Flutter or React Native, connected to a backend.\n"
+        "- Cloud & DevOps: Docker, GitHub Actions pipelines and deployment on AWS or GCP, kept inside budget."
+    )
+
+    return (
+        f"You are the AI assistant embedded on {EMAIL_FROM_NAME}'s portfolio website (rpsahnni.dev). "
+        f"{EMAIL_FROM_NAME} is a freelance full-stack, mobile and AI-automation developer based in Deoghar, "
+        "Jharkhand, India.\n\n"
+        "Your job: give every visitor a complete, accurate answer in one go — about his projects, skills, "
+        "services, working style, availability, and how to get in touch. Be warm, concise and specific; "
+        "use short paragraphs or simple bullet points, not walls of text.\n"
+        "Reply in PLAIN TEXT only — this is rendered as-is in a chat bubble with no markdown support. "
+        "Never use asterisks, hash headers, backticks or markdown links. For a list, start each line with "
+        "'- '. For emphasis, just write plainly instead of using bold/italics.\n"
+        "Never invent projects, numbers, prices or claims that are not in the context below — if you don't "
+        "know something, say so plainly and point them to the contact form or email.\n"
+        "If asked something unrelated to him, his work, or hiring him, politely redirect to what you can help with.\n\n"
+        f"PROJECTS:\n{projects_txt}\n\n"
+        f"SKILLS:\n{skills_txt}\n\n"
+        f"SERVICES:\n{services_txt}\n\n"
+        "CONTACT:\n"
+        f"- Email: {CONTACT_EMAIL}\n"
+        "- Phone / WhatsApp: +91 90396 93335\n"
+        "- GitHub: github.com/rpsahnni-creator — LinkedIn: linkedin.com/in/rp-sahnni\n"
+        "- There is also a contact form on this site (the 'Let's build something' section) that sends the "
+        "enquiry straight to him.\n"
+    )
+
+
+async def _call_anthropic(system: str, messages: list[dict]) -> str:
+    async with httpx.AsyncClient(timeout=30) as client:
+        resp = await client.post(
+            "https://api.anthropic.com/v1/messages",
+            headers={
+                "x-api-key": ANTHROPIC_API_KEY,
+                "anthropic-version": "2023-06-01",
+                "content-type": "application/json",
+            },
+            json={"model": ANTHROPIC_CHAT_MODEL, "max_tokens": 600, "system": system, "messages": messages},
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        return "".join(b.get("text", "") for b in data.get("content", []) if b.get("type") == "text").strip()
+
+
+async def _call_openai(system: str, messages: list[dict]) -> str:
+    async with httpx.AsyncClient(timeout=30) as client:
+        resp = await client.post(
+            "https://api.openai.com/v1/chat/completions",
+            headers={"Authorization": f"Bearer {OPENAI_API_KEY}", "content-type": "application/json"},
+            json={
+                "model": OPENAI_CHAT_MODEL,
+                "max_tokens": 600,
+                "messages": [{"role": "system", "content": system}] + messages,
+            },
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        return data["choices"][0]["message"]["content"].strip()
+
+
+async def _call_gemini(system: str, messages: list[dict]) -> str:
+    contents = [
+        {"role": "model" if m["role"] == "assistant" else "user", "parts": [{"text": m["content"]}]}
+        for m in messages
+    ]
+    async with httpx.AsyncClient(timeout=30) as client:
+        resp = await client.post(
+            f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_CHAT_MODEL}:generateContent",
+            params={"key": GEMINI_API_KEY},
+            json={
+                "system_instruction": {"parts": [{"text": system}]},
+                "contents": contents,
+                "generationConfig": {"maxOutputTokens": 1024, "thinkingConfig": {"thinkingBudget": 0}},
+            },
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        parts = data["candidates"][0]["content"]["parts"]
+        return "".join(p.get("text", "") for p in parts).strip()
+
+
+@api_router.post("/chat")
+async def chat(payload: ChatIn, request: Request):
+    ip = get_client_ip(request)
+    if not await _rate_ok(ip, kind="chat", limit=20, window=600):
+        raise HTTPException(status_code=429, detail="Too many messages. Please wait a bit and try again.")
+
+    provider = _active_chat_provider()
+    if not provider:
+        return {
+            "reply": (
+                "The AI assistant isn't fully set up yet — but I'd still love to help! Please reach out via "
+                f"the contact form below, WhatsApp, or email {CONTACT_EMAIL}."
+            ),
+            "provider": None,
+        }
+
+    system = await _build_chat_system_prompt()
+    messages = [{"role": m.role, "content": m.content} for m in payload.history[-10:]]
+    messages.append({"role": "user", "content": payload.message})
+
+    try:
+        if provider == "anthropic":
+            reply = await _call_anthropic(system, messages)
+        elif provider == "openai":
+            reply = await _call_openai(system, messages)
+        else:
+            reply = await _call_gemini(system, messages)
+    except Exception as e:
+        logger.error(f"Chat provider {provider} error: {e}")
+        raise HTTPException(
+            status_code=502, detail="The assistant is temporarily unavailable. Please try again or use the contact form."
+        )
+
+    if not reply:
+        raise HTTPException(
+            status_code=502, detail="The assistant is temporarily unavailable. Please try again or use the contact form."
+        )
+
+    return {"reply": reply, "provider": provider}
 
 
 class ContactIn(BaseModel):

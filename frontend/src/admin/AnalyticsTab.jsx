@@ -38,9 +38,11 @@ export default function AnalyticsTab() {
         </p>
         <div className="flex h-36 items-end gap-3" data-testid="analytics-chart">
           {data.days.map((d) => (
-            <div key={d.day} className="flex flex-1 flex-col items-center gap-2">
+            <div key={d.day} className="flex h-full flex-1 flex-col items-center gap-2">
               <span className="font-mono text-[10px] text-slate-500">{d.views}</span>
-              <div className="w-full rounded-t-md bg-emerald-500/80 transition-all" style={{ height: `${Math.max(4, (d.views / maxViews) * 100)}%` }} />
+              <div className="flex min-h-0 w-full flex-1 items-end">
+                <div className="w-full rounded-t-md bg-emerald-500/80 transition-all" style={{ height: `${Math.max(4, (d.views / maxViews) * 100)}%` }} />
+              </div>
               <span className="font-mono text-[10px] text-slate-600">{d.day.slice(5)}</span>
             </div>
           ))}

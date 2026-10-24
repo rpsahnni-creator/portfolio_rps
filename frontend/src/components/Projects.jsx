@@ -18,7 +18,7 @@ function CardVisual({ p, tall }) {
         className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
       />
       <div className="absolute inset-0 bg-gradient-to-t from-[rgba(7,10,15,0.85)] via-transparent to-transparent" aria-hidden="true" />
-      <span className="absolute left-3 top-3 rounded-full border border-[rgba(255,255,255,0.2)] bg-[rgba(7,10,15,0.55)] px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-emerald-300 backdrop-blur">
+      <span className="absolute left-3 top-3 rounded-full border border-[rgba(255,255,255,0.2)] bg-[rgba(7,10,15,0.55)] px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[#6ee7b7] backdrop-blur">
         {p.cl}
       </span>
       <span className="absolute bottom-1 right-4 font-display text-6xl font-extrabold text-[rgba(255,255,255,0.2)]" aria-hidden="true">

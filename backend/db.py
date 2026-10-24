@@ -88,6 +88,8 @@ CREATE TABLE IF NOT EXISTS files (
 
 -- Safe to re-run: adds columns introduced after a table already existed.
 ALTER TABLE pageviews ADD COLUMN IF NOT EXISTS ua TEXT NOT NULL DEFAULT '';
+ALTER TABLE rate_hits ADD COLUMN IF NOT EXISTS kind TEXT NOT NULL DEFAULT 'contact';
+CREATE INDEX IF NOT EXISTS idx_rate_hits_kind_ip_at ON rate_hits (kind, ip, at);
 """
 
 

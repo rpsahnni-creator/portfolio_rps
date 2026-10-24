@@ -18,6 +18,8 @@ export const me = {
   location: "Deoghar, Jharkhand, India",
   github: "https://github.com/rpsahnni-creator",
   linkedin: "https://www.linkedin.com/in/rp-sahnni",
+  facebook: "https://www.facebook.com/rpsahnni",
+  instagram: "https://www.instagram.com/rpsahnni",
 };
 
 export const roles = [

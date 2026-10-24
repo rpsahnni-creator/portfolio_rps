@@ -73,5 +73,4 @@ jobs:
         working-directory: frontend
         env:
           CI: false
-          DISABLE_EMERGENT_OVERLAY: "true"
         run: yarn build

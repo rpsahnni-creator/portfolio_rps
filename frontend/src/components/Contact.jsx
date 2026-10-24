@@ -1,7 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { toast } from "sonner";
-import { Github, Linkedin, Mail, MapPin, MessageCircle, Phone, Send } from "lucide-react";
+import { Facebook, Github, Instagram, Linkedin, Mail, MapPin, MessageCircle, Phone, Send } from "lucide-react";
 import { me } from "../data";
 import { Block, Reveal } from "./Section";
 
@@ -80,6 +80,20 @@ export default function Contact() {
             <span>
               <small className="block font-mono text-[11px] uppercase tracking-[0.2em] text-slate-500">LinkedIn</small>
               linkedin.com/in/rp-sahnni
+            </span>
+          </a>
+          <a href={me.instagram} target="_blank" rel="noopener noreferrer" data-testid="contact-instagram-link" className={row}>
+            <Instagram className="mt-0.5 shrink-0 text-emerald-400" size={18} />
+            <span>
+              <small className="block font-mono text-[11px] uppercase tracking-[0.2em] text-slate-500">Instagram</small>
+              {me.instagram.replace("https://www.", "")}
+            </span>
+          </a>
+          <a href={me.facebook} target="_blank" rel="noopener noreferrer" data-testid="contact-facebook-link" className={row}>
+            <Facebook className="mt-0.5 shrink-0 text-emerald-400" size={18} />
+            <span>
+              <small className="block font-mono text-[11px] uppercase tracking-[0.2em] text-slate-500">Facebook</small>
+              {me.facebook.replace("https://www.", "")}
             </span>
           </a>
           <p className={row}>

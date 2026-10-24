@@ -39,6 +39,13 @@ services:
       EMAIL_REPLY_TO: ${EMAIL_REPLY_TO:-}
       OWNER_EMAIL: ${OWNER_EMAIL}
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost}
+      CHAT_PROVIDER: ${CHAT_PROVIDER:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      ANTHROPIC_CHAT_MODEL: ${ANTHROPIC_CHAT_MODEL:-claude-sonnet-5-5}
+      OPENAI_CHAT_MODEL: ${OPENAI_CHAT_MODEL:-gpt-4o-mini}
+      GEMINI_CHAT_MODEL: ${GEMINI_CHAT_MODEL:-gemini-3.5-flash}
 
   frontend:
     build:
