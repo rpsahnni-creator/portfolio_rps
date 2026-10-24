@@ -63,11 +63,11 @@ export default function About() {
               </p>
               <div className="mt-7 flex flex-wrap gap-3 border-t border-white/5 pt-6">
                 <a href={me.github} target="_blank" rel="noopener noreferrer" data-testid="about-github-link"
-                  className="inline-flex items-center gap-2 rounded-full border border-white/15 px-4 py-2 font-mono text-[11px] text-slate-300 transition-colors hover:border-emerald-400/50 hover:text-emerald-300">
+                  className="inline-flex items-center gap-2 rounded-full border border-white/15 px-4 py-2 font-mono text-[11px] text-slate-300 transition-colors hover:border-slate-400/50 hover:text-[#181717] dark:hover:text-white">
                   <Github size={14} /> GitHub
                 </a>
                 <a href={me.linkedin} target="_blank" rel="noopener noreferrer" data-testid="about-linkedin-link"
-                  className="inline-flex items-center gap-2 rounded-full border border-white/15 px-4 py-2 font-mono text-[11px] text-slate-300 transition-colors hover:border-emerald-400/50 hover:text-emerald-300">
+                  className="inline-flex items-center gap-2 rounded-full border border-white/15 px-4 py-2 font-mono text-[11px] text-slate-300 transition-colors hover:border-[#0A66C2]/50 hover:text-[#0A66C2]">
                   <Linkedin size={14} /> LinkedIn
                 </a>
                 <a href={resumeUrl || "/Ram-Pravesh-Sahni-Resume.pdf"} download data-testid="about-resume-button"

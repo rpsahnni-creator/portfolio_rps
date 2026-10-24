@@ -62,35 +62,35 @@ export default function Contact() {
             </span>
           </a>
           <a href={me.wa} target="_blank" rel="noopener noreferrer" data-testid="contact-whatsapp-link" className={row}>
-            <MessageCircle className="mt-0.5 shrink-0 text-emerald-400" size={18} />
+            <MessageCircle className="mt-0.5 shrink-0 text-[#25D366]" size={18} />
             <span>
               <small className="block font-mono text-[11px] uppercase tracking-[0.2em] text-slate-500">WhatsApp</small>
               Message me directly
             </span>
           </a>
           <a href={me.github} target="_blank" rel="noopener noreferrer" className={row}>
-            <Github className="mt-0.5 shrink-0 text-emerald-400" size={18} />
+            <Github className="mt-0.5 shrink-0 text-[#181717] dark:text-white" size={18} />
             <span>
               <small className="block font-mono text-[11px] uppercase tracking-[0.2em] text-slate-500">GitHub</small>
               github.com/rpsahnni-creator
             </span>
           </a>
           <a href={me.linkedin} target="_blank" rel="noopener noreferrer" className={row}>
-            <Linkedin className="mt-0.5 shrink-0 text-emerald-400" size={18} />
+            <Linkedin className="mt-0.5 shrink-0 text-[#0A66C2]" size={18} />
             <span>
               <small className="block font-mono text-[11px] uppercase tracking-[0.2em] text-slate-500">LinkedIn</small>
               linkedin.com/in/rp-sahnni
             </span>
           </a>
           <a href={me.instagram} target="_blank" rel="noopener noreferrer" data-testid="contact-instagram-link" className={row}>
-            <Instagram className="mt-0.5 shrink-0 text-emerald-400" size={18} />
+            <Instagram className="mt-0.5 shrink-0 text-[#E4405F]" size={18} />
             <span>
               <small className="block font-mono text-[11px] uppercase tracking-[0.2em] text-slate-500">Instagram</small>
               {me.instagram.replace("https://www.", "")}
             </span>
           </a>
           <a href={me.facebook} target="_blank" rel="noopener noreferrer" data-testid="contact-facebook-link" className={row}>
-            <Facebook className="mt-0.5 shrink-0 text-emerald-400" size={18} />
+            <Facebook className="mt-0.5 shrink-0 text-[#1877F2]" size={18} />
             <span>
               <small className="block font-mono text-[11px] uppercase tracking-[0.2em] text-slate-500">Facebook</small>
               {me.facebook.replace("https://www.", "")}
