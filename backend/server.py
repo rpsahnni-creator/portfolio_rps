@@ -215,6 +215,35 @@ DEFAULT_TESTIMONIALS = [
 # Leave gaps so a new project can slot in between, and keep the list in display order.
 SHOWCASE_PROJECTS = [
     {
+        "key": "kiji-studymate",
+        "order": -400,
+        "title": "Kiji StudyMate — AI Quizzes from Textbook Scans",
+        "cat": "ai",
+        "desc": (
+            "An AI study platform built for Kiji Technology OPC Pvt. Ltd.: students photograph textbook pages and get an instant practice quiz. A Go API runs the whole pipeline — PaddleOCR with a Gemini Vision fallback, then Gemini quiz generation with multi-level caching to keep AI costs down — and serves a Next.js web app, an admin panel and an Expo / React Native Android app. Plans are sold through Razorpay and PayU, with auto-renew, refunds and account credits."
+        ),
+        "hi": "Scan → OCR → AI quiz · Gemini + PaddleOCR · Web, Android & admin",
+        "tech": ["Go", "Next.js", "React Native", "Expo", "PostgreSQL", "Redis / Valkey", "Gemini AI", "PaddleOCR"],
+        "featured": True,
+        "img": "/projects/kiji-studymate.webp",
+        "features": [
+            "End-to-end pipeline: scan pages (camera, gallery, crop, multi-page upload) → OCR → AI-generated quiz → attempt → results with explanations",
+            "PaddleOCR microservice (Python + FastAPI) as the primary OCR engine, with Gemini Vision as a fallback for hard pages",
+            "Gemini quiz generation and answer engine behind a circuit breaker, with OpenAI available as an alternate provider",
+            "Multi-tier caching of OCR text, content and the quiz bank (Redis + PostgreSQL) to cut AI cost — a chapter already processed is served from cache",
+            "Students review draft questions, publish quizzes and track progress through reports, topic analytics and quiz history",
+            "Career goals with a daily practice path, plus email and push notifications with quiet hours",
+            "Billing with Razorpay and PayU: plans, usage limits, auto-renew, payment history, refund requests and account credits",
+            "Admin panel: users, scan jobs and retries, AI cost monitoring, cache controls, content moderation, feature flags, payments, refunds and an audit log",
+            "Production-grade backend: Docker on Fly.io, 39 database migrations, CI with race detection and linting, health/readiness probes and Prometheus metrics",
+        ],
+        "outcome": (
+            "Turns any textbook page into a ready-to-take practice quiz, and gives the client one platform — web app, Android app and admin console — to run and monetise it."
+        ),
+        "gh": "",
+        "live": "https://studymate.kijitechnology.in",
+    },
+    {
         "key": "kijibooks",
         "order": -300,
         "title": "KijiBooks — GST Billing & Accounting SaaS",
