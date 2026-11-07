@@ -2,15 +2,17 @@ import { ArrowUp, Facebook, Github, Instagram, Linkedin, Mail } from "lucide-rea
 import { me } from "../data";
 import Logo from "./Logo";
 
+// Deep green footer in both themes — fixed hex colours (not the theme-swapping
+// slate/white tokens) so text stays light and readable on the green background.
 const iconLink =
-  "grid h-10 w-10 place-items-center rounded-full border border-white/10 text-slate-400 transition-all duration-200 hover:-translate-y-0.5";
+  "grid h-10 w-10 place-items-center rounded-full border border-[rgba(255,255,255,0.18)] bg-[rgba(255,255,255,0.06)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#ffffff]";
 
 const BRAND = {
-  github: "hover:border-slate-400/50 hover:text-[#181717] dark:hover:border-white/30 dark:hover:text-white",
-  linkedin: "hover:border-[#0A66C2]/50 hover:text-[#0A66C2]",
-  instagram: "hover:border-[#E4405F]/50 hover:text-[#E4405F]",
-  facebook: "hover:border-[#1877F2]/50 hover:text-[#1877F2]",
-  mail: "hover:border-emerald-400/50 hover:text-emerald-300",
+  github: "text-[#ffffff] hover:text-[#181717]",
+  linkedin: "text-[#7cc4ff] hover:text-[#0A66C2]",
+  instagram: "text-[#ff8fa6] hover:text-[#E4405F]",
+  facebook: "text-[#8fb8ff] hover:text-[#1877F2]",
+  mail: "text-[#6ee7b7] hover:text-[#064e3b]",
 };
 
 export default function Footer() {
@@ -20,9 +22,9 @@ export default function Footer() {
   };
 
   return (
-    <footer className="border-t border-white/5 py-10">
+    <footer className="border-t border-[rgba(52,211,153,0.25)] bg-[#064e3b] pb-28 pt-10 sm:pb-10" data-testid="site-footer">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-5 px-5 sm:px-8">
-        <Logo size={32} />
+        <Logo size={32} onDark />
         <div className="flex items-center gap-3">
           <a href={me.github} target="_blank" rel="noopener noreferrer" aria-label="GitHub" data-testid="footer-github-link" className={`${iconLink} ${BRAND.github}`}>
             <Github size={17} />
@@ -40,12 +42,12 @@ export default function Footer() {
             <Mail size={17} />
           </a>
           <button onClick={toTop} aria-label="Back to top" data-testid="footer-back-to-top"
-            className="grid h-10 w-10 place-items-center rounded-full bg-emerald-500 text-onacc transition-transform duration-200 hover:-translate-y-1">
+            className="grid h-10 w-10 place-items-center rounded-full bg-[#34d399] text-[#04120d] transition-transform duration-200 hover:-translate-y-1 hover:bg-[#6ee7b7]">
             <ArrowUp size={17} />
           </button>
         </div>
-        <p className="font-mono text-xs tracking-wider text-slate-500" data-testid="footer-copyright">
-          © {new Date().getFullYear()} {me.name} · {me.location} · <a href="/admin" data-testid="footer-admin-link" className="hover:text-emerald-300">Admin</a>
+        <p className="font-mono text-xs tracking-wider text-[#a7f3d0]" data-testid="footer-copyright">
+          © {new Date().getFullYear()} {me.name} · {me.location} · <a href="/admin" data-testid="footer-admin-link" className="text-[#a7f3d0] underline-offset-2 hover:text-[#ffffff] hover:underline">Admin</a>
         </p>
       </div>
     </footer>

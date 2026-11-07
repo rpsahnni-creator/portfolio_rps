@@ -1,4 +1,5 @@
-export default function Logo({ size = 40, withWordmark = true }) {
+// onDark: fixed light colours for use on a dark coloured surface (e.g. the green footer) in both themes.
+export default function Logo({ size = 40, withWordmark = true, onDark = false }) {
   return (
     <span className="inline-flex items-center gap-2.5">
       <svg width={size} height={size} viewBox="0 0 64 64" data-testid="logo-mark" aria-hidden="true">
@@ -7,8 +8,8 @@ export default function Logo({ size = 40, withWordmark = true }) {
         <circle cx="48" cy="45" r="4" fill="#F59E0B" />
       </svg>
       {withWordmark && (
-        <span className="font-display text-lg font-bold tracking-tight text-slate-100">
-          rpsahnni<span className="text-emerald-400">.dev</span>
+        <span className={`font-display text-lg font-bold tracking-tight ${onDark ? "text-[#ffffff]" : "text-slate-100"}`}>
+          rpsahnni<span className={onDark ? "text-[#6ee7b7]" : "text-emerald-400"}>.dev</span>
         </span>
       )}
     </span>
