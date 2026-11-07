@@ -103,6 +103,8 @@ export default function Projects() {
   const [selected, setSelected] = useState(null);
   const { projects } = useContent();
   const list = projects.filter((p) => f === "all" || p.c === f);
+  // Only offer categories that actually have projects, so no filter ever shows an empty grid.
+  const shown = filters.filter(([k]) => k === "all" || projects.some((p) => p.c === k));
 
   return (
     <Block id="projects">
@@ -112,7 +114,7 @@ export default function Projects() {
         text="Everything I have built — from high-throughput backends to AI automations. Click any project for the full case study."
       />
       <div className="mb-10 flex flex-wrap gap-2">
-        {filters.map(([k, label]) => (
+        {shown.map(([k, label]) => (
           <button
             key={k}
             onClick={() => setF(k)}
@@ -130,7 +132,9 @@ export default function Projects() {
       <motion.div layout className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-6">
         <AnimatePresence mode="popLayout">
           {list.map((p) => (
-            <ProjectCard key={p.id || p.t} p={p} onOpen={setSelected} />
+            // Keyed by title, not id: the fallback list and the API use different ids for the same
+            // project, and id keys made the swap run exit animations that could leave duplicates.
+            <ProjectCard key={p.t} p={p} onOpen={setSelected} />
           ))}
         </AnimatePresence>
       </motion.div>

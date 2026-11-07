@@ -182,13 +182,9 @@ async def seed_admin():
 CAT_LABELS = {"backend": "Backend", "web": "Web", "mobile": "Mobile", "ai": "AI & Automation"}
 SPAN_PATTERN = ["lg:col-span-3", "lg:col-span-3", "lg:col-span-2", "lg:col-span-2", "lg:col-span-2"]
 
-DEFAULT_PROJECTS = [
-    {"title": "Realtime Chat Service", "cat": "backend", "desc": "Ultra-low latency WebSocket chat server supporting 10k+ concurrent connections with pub/sub architecture and message history.", "hi": "10k+ concurrent sockets · Redis pub/sub", "tech": ["Golang", "Redis", "PostgreSQL"], "featured": False, "order": 1, "img": "https://images.pexels.com/photos/26765065/pexels-photo-26765065.png?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940", "features": ["WebSocket server in Go built for high throughput", "Redis pub/sub fan-out across multiple nodes", "Persistent message history in PostgreSQL", "Graceful reconnects and presence tracking"], "outcome": "10k+ concurrent connections stay live with sub-second message delivery.", "gh": "https://github.com/rpsahnni-creator", "live": ""},
-    {"title": "Business Dashboard", "cat": "web", "desc": "Analytics & financial management portal featuring real-time telemetry, charts and exportable reports behind secure login.", "hi": "Live telemetry · exportable reports", "tech": ["React", "TypeScript", "Tailwind CSS"], "featured": False, "order": 2, "img": "https://images.pexels.com/photos/9951077/pexels-photo-9951077.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940", "features": ["Real-time charts and KPI telemetry", "Secure authentication and session handling", "Exportable PDF/CSV reports", "Fast loads with TypeScript-safe data layer"], "outcome": "Owners see the whole business on one screen and export reports in a click.", "gh": "https://github.com/rpsahnni-creator", "live": ""},
-    {"title": "Delivery Tracking App", "cat": "mobile", "desc": "Cross-platform mobile application with live GPS driver movement, push alerts and full order lifecycle management.", "hi": "Live GPS tracking · push notifications", "tech": ["Flutter", "Firebase", "FastAPI"], "featured": False, "order": 3, "img": "https://images.unsplash.com/photo-1759661881353-5b9cc55e1cf4?crop=entropy&cs=srgb&fm=jpg&q=85", "features": ["Single Flutter codebase for Android and iOS", "Live driver GPS movement on maps", "Push notifications at every order stage", "FastAPI backend with Firebase sync"], "outcome": "Customers watch their delivery move in real time, from pickup to doorstep.", "gh": "https://github.com/rpsahnni-creator", "live": ""},
-    {"title": "Lead-to-WhatsApp Automation", "cat": "ai", "desc": "Zero-human workflow routing incoming lead forms through AI qualification directly into WhatsApp conversations within seconds.", "hi": "AI lead scoring · instant WhatsApp reply", "tech": ["n8n", "OpenAI", "Webhooks"], "featured": False, "order": 4, "img": "https://images.pexels.com/photos/26765065/pexels-photo-26765065.png?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940", "features": ["n8n workflow triggered by any form or webhook", "AI scores and qualifies every new lead", "Instant personalised reply on WhatsApp", "Retries and logging built into the pipeline"], "outcome": "Every lead gets an intelligent WhatsApp reply in seconds — even at 2 AM.", "gh": "https://github.com/rpsahnni-creator", "live": ""},
-    {"title": "Support Chatbot with RAG", "cat": "ai", "desc": "Context-aware AI knowledge assistant answering from dynamic company documents via retrieval-augmented generation.", "hi": "Vector search · human handover", "tech": ["FastAPI", "LangChain", "PostgreSQL Vector"], "featured": False, "order": 5, "img": "https://images.pexels.com/photos/9951077/pexels-photo-9951077.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940", "features": ["RAG over company documents and FAQs", "Vector search stored in PostgreSQL", "FastAPI serving layer with LangChain", "Hands over to a human when confidence is low"], "outcome": "Support answers come from your own documents — accurate, instant, always on.", "gh": "https://github.com/rpsahnni-creator", "live": ""},
-]
+# Placeholder projects for an empty table. All of them have been replaced by real
+# work in SHOWCASE_PROJECTS, so a fresh database starts with real projects only.
+DEFAULT_PROJECTS: list[dict] = []
 
 DEFAULT_SKILLS = [
     {"name": "Backend", "items": ["Python", "Django", "Django REST", "FastAPI", "Golang", "Node.js", "Express.js", "TypeScript", "GraphQL", "Celery"], "order": 0},
@@ -399,6 +395,12 @@ SHOWCASE_PROJECTS = [
 # (tracked in seed_markers), so re-adding it by hand in the admin panel sticks.
 RETIRED_PROJECT_TITLES = [
     "Billing & Invoice API",  # replaced by KijiBooks
+    # removed at the owner's request once the real projects were in
+    "Realtime Chat Service",
+    "Business Dashboard",
+    "Delivery Tracking App",
+    "Lead-to-WhatsApp Automation",
+    "Support Chatbot with RAG",
 ]
 
 
