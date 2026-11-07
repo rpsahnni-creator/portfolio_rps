@@ -83,7 +83,7 @@ const projectList = [
     ],
     outcome: "One product a business can sign up for and run its daily billing on, with GST-ready books its accountant can file from — built as a SaaS the client can sell to many businesses.",
     gh: "",
-    live: "",
+    live: "https://kijibooks.kijitechnology.in",
   },
   {
     id: "project-kijibestiee",

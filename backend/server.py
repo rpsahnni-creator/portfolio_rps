@@ -241,7 +241,7 @@ SHOWCASE_PROJECTS = [
             "One product a business can sign up for and run its daily billing on, with GST-ready books its accountant can file from — built as a SaaS the client can sell to many businesses."
         ),
         "gh": "",
-        "live": "",
+        "live": "https://kijibooks.kijitechnology.in",
     },
     {
         "key": "kijibestiee",
@@ -328,8 +328,10 @@ async def retire_placeholders():
                 logger.info(f"Retired placeholder project {title!r} ({res})")
 
 
-# Bump when `order` values of already-seeded projects change, to re-apply them once.
-SHOWCASE_ORDER_VERSION = 1
+# Bump when the `order` or `live` URL of an already-seeded project changes in the list
+# above: on the next start, those two fields are re-applied once to existing databases.
+# v2: KijiBooks got its live URL.
+SHOWCASE_SYNC_VERSION = 2
 
 
 async def seed_showcase():
@@ -354,15 +356,18 @@ async def seed_showcase():
             )
             logger.info(f"Showcase project added: {p['title']}")
 
-    # Projects seeded before positions were fixed got ad-hoc sort orders; line them up once.
+    # Rows seeded earlier keep whatever order/live they were inserted with; sync them once per version.
     async with pool.acquire() as conn, conn.transaction():
         claimed = await conn.fetchval(
             "INSERT INTO seed_markers (key, applied_at) VALUES ($1,$2) ON CONFLICT DO NOTHING RETURNING key",
-            f"showcase-order:v{SHOWCASE_ORDER_VERSION}", now,
+            f"showcase-sync:v{SHOWCASE_SYNC_VERSION}", now,
         )
         if claimed:
             for p in SHOWCASE_PROJECTS:
-                await conn.execute("UPDATE projects SET sort_order=$1 WHERE title=$2", p["order"], p["title"])
+                await conn.execute(
+                    "UPDATE projects SET sort_order=$1, live=$2 WHERE title=$3",
+                    p["order"], p.get("live", ""), p["title"],
+                )
 
 
 async def seed_content():

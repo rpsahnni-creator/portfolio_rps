@@ -302,3 +302,26 @@ def test_retired_placeholder_is_removed_once(client):
     titles = [p["title"] for p in client.get("/api/admin/projects", headers=headers).json()]
     assert title in titles
     assert client.delete(f"/api/admin/projects/{pid}", headers=headers).status_code == 200
+
+
+def test_showcase_sync_updates_live_url_on_existing_rows(client):
+    from server import SHOWCASE_PROJECTS, SHOWCASE_SYNC_VERSION, get_pool, seed_showcase
+
+    # An earlier test deletes the first showcase project, so use one that is still there.
+    headers = _auth_headers(client)
+    present = {r["title"] for r in client.get("/api/admin/projects", headers=headers).json()}
+    p = next(x for x in SHOWCASE_PROJECTS if x["live"] and x["title"] in present)
+
+    async def simulate_old_database():
+        # A row seeded before the live URL existed, and a database that hasn't run this sync yet.
+        pool = get_pool()
+        await pool.execute("UPDATE projects SET live='' WHERE title=$1", p["title"])
+        await pool.execute("DELETE FROM seed_markers WHERE key=$1", f"showcase-sync:v{SHOWCASE_SYNC_VERSION}")
+
+    client.portal.call(simulate_old_database)
+    client.portal.call(seed_showcase)
+
+    headers = _auth_headers(client)
+    row = next(r for r in client.get("/api/admin/projects", headers=headers).json() if r["title"] == p["title"])
+    assert row["live"] == p["live"]
+    assert row["order"] == p["order"]
