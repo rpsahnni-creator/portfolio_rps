@@ -334,6 +334,35 @@ SHOWCASE_PROJECTS = [
         "gh": "",
         "live": "https://nsnv.kijitechnology.in",
     },
+    {
+        "key": "srt-college-dhamri",
+        "order": -50,
+        "title": "S.R.T. College Dhamri — Official College Website",
+        "cat": "web",
+        "desc": (
+            "The official website of S.R.T. College, Dhamri — a constituent college of Sido Kanhu Murmu University, Dumka — built by Kiji Technology with PHP 8, MySQL and modern HTML, CSS and JavaScript. A responsive, bilingual (English & Hindi) site of 50+ pages covers admissions, academics, administration, student amenities and a complete IQAC / NAAC section, with an admin panel that lets college staff keep news, notices and galleries up to date."
+        ),
+        "hi": "Live · 50+ pages · PHP 8 + MySQL · IQAC / NAAC ready",
+        "tech": ["PHP 8", "MySQL", "HTML5", "CSS3", "JavaScript", "Tailwind CSS", "DataTables", "SweetAlert2"],
+        "featured": True,
+        "img": "/projects/srt-college-dhamri.webp",
+        "features": [
+            "Responsive, bilingual (English & Hindi) website of 50+ pages for students, parents, staff and accreditation bodies",
+            "Admissions hub: guidelines, prospectus and fee structure, with links to online admission and the university exam portal for admit cards and results",
+            "Complete IQAC section for NAAC: AQAR, meeting minutes, action-taken reports, policies, best practices, institutional distinctiveness and feedback analysis",
+            "Academics and administration: programmes, NEP information, academic calendar, teaching and non-teaching staff directories, committees and the principal's message",
+            "Student amenities: library, NCC, NSS and student activities, plus grievance, student-query and stakeholder feedback forms",
+            "Database-driven news, notices and events, photo galleries (academic, campus, events) and a video section",
+            "Admin panel for college staff to update content without touching code",
+            "Quick links to NAAC, NIRF, webmail, alumni, social channels and national e-learning resources such as NPTEL, NDL and DIKSHA",
+            "Built on PHP 8 and MySQL with clean HTML, CSS and JavaScript — lightweight and easy to host",
+        ],
+        "outcome": (
+            "The college has one official, up-to-date home online for admissions, notices and NAAC / IQAC documentation — kept current by its own staff."
+        ),
+        "gh": "",
+        "live": "https://srtc.ac.in",
+    },
 ]
 
 
