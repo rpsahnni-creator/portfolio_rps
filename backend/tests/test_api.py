@@ -198,3 +198,68 @@ def test_image_upload_is_optimized_to_webp(client):
 
 def test_resume_missing_by_default(client):
     assert client.get("/api/resume").status_code == 404
+
+
+# ---------------- Contact form edge cases ----------------
+
+def _capture_smtp(monkeypatch):
+    import server
+
+    sent = []
+
+    async def fake_send(msg, **kwargs):
+        sent.append(msg)
+
+    monkeypatch.setattr(server, "SMTP_HOST", "smtp.test.local")
+    monkeypatch.setattr(server.aiosmtplib, "send", fake_send)
+    return sent
+
+
+def test_contact_email_survives_tricky_input(client, monkeypatch):
+    sent = _capture_smtp(monkeypatch)
+    payload = {
+        "name": "Bad\r\nBcc: spam@example.com",
+        "email": "client@example.com",
+        "phone": "+91 99999 00000",
+        "message": "We need a checkout page with card + CVV validation and a seed phrase backup.",
+    }
+    r = client.post("/api/contact", json=payload, headers={"X-Forwarded-For": "203.0.113.10"})
+    assert r.status_code == 200
+    assert r.json()["emailed"] is True
+
+    import server
+
+    owner = next(m for m in sent if m["To"] == server.OWNER_EMAIL)
+    assert "\n" not in owner["Subject"]
+    assert owner["Reply-To"] == "client@example.com"
+    assert "+91 99999 00000" in owner.get_body(("html",)).get_content()
+    assert any(m["To"] == "client@example.com" for m in sent)
+
+
+def test_contact_honeypot_is_silently_dropped(client):
+    headers = _auth_headers(client)
+    payload = {"name": "Bot", "email": "bot@example.com", "message": "Buy cheap followers now!!!", "website": "http://spam"}
+    r = client.post("/api/contact", json=payload, headers={"X-Forwarded-For": "203.0.113.11"})
+    assert r.status_code == 200
+    r = client.get("/api/admin/enquiries", headers=headers)
+    assert not any(e["email"] == "bot@example.com" for e in r.json())
+
+
+# ---------------- Chat history ----------------
+
+def test_chat_history_is_normalized():
+    from server import ChatMessage, _normalize_history
+
+    hist = [
+        ChatMessage(role="assistant", content="Hi! Ask me anything."),
+        ChatMessage(role="user", content="What do you build?"),
+        ChatMessage(role="assistant", content="APIs and apps."),
+        ChatMessage(role="assistant", content="Also automations."),
+    ]
+    out = _normalize_history(hist, "Price?")
+    assert out[0]["role"] == "user"
+    assert [m["role"] for m in out] == ["user", "assistant", "user"]
+    assert out[-1]["content"] == "Price?"
+
+    out = _normalize_history([ChatMessage(role="user", content="hello")], "again")
+    assert out == [{"role": "user", "content": "hello\n\nagain"}]

@@ -15,13 +15,16 @@ export default function ProjectModal({ p, onClose }) {
     <AnimatePresence>
       {p && (
         <motion.div
-          className="fixed inset-0 z-[95] grid place-items-center overflow-y-auto bg-black/70 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-[96] overflow-y-auto overscroll-contain bg-black/70 backdrop-blur-sm"
+          data-lenis-prevent
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
           data-testid="project-modal"
         >
+          {/* min-h-full wrapper: centres short cases, lets tall ones scroll from the top instead of clipping */}
+          <div className="flex min-h-full items-center justify-center p-4">
           <motion.div
             className="relative w-full max-w-2xl rounded-2xl border border-white/10 bg-panel p-6 sm:p-8"
             initial={{ opacity: 0, y: 40, scale: 0.97 }}
@@ -58,7 +61,7 @@ export default function ProjectModal({ p, onClose }) {
             <p className="mt-3 text-sm leading-relaxed text-slate-400">{p.d}</p>
 
             <ul className="mt-6 grid gap-2.5">
-              {p.features.map((f) => (
+              {(p.features || []).map((f) => (
                 <li key={f} className="flex items-start gap-3 text-sm text-slate-300">
                   <Check size={16} className="mt-0.5 shrink-0 text-emerald-400" />
                   {f}
@@ -66,12 +69,14 @@ export default function ProjectModal({ p, onClose }) {
               ))}
             </ul>
 
-            <p className="mt-6 font-mono text-xs leading-relaxed text-amber-400/90">
-              <span className="text-slate-600">&gt; </span>{p.outcome}
-            </p>
+            {p.outcome && (
+              <p className="mt-6 font-mono text-xs leading-relaxed text-amber-400/90">
+                <span className="text-slate-600">&gt; </span>{p.outcome}
+              </p>
+            )}
 
             <div className="mt-6 flex flex-wrap gap-2">
-              {p.k.map((x) => (
+              {(p.k || []).map((x) => (
                 <span key={x} className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 font-mono text-[11px] text-slate-300">
                   {x}
                 </span>
@@ -111,6 +116,7 @@ export default function ProjectModal({ p, onClose }) {
               </a>
             </div>
           </motion.div>
+          </div>
         </motion.div>
       )}
     </AnimatePresence>

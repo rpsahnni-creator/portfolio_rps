@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { AnimatePresence, motion } from "framer-motion";
-import { Bot, MessageCircle, Send, X } from "lucide-react";
+import { Bot, MessageCircle, Phone, Send, X } from "lucide-react";
 import { me } from "../data";
 
-const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+import { API } from "../lib/backend";
 const STORAGE_KEY = "chat_history";
 const MAX_HISTORY = 12;
 
@@ -52,7 +52,8 @@ export default function ChatWidget() {
     if (!trimmed || loading) return;
 
     const history = messages
-      .filter((m) => m !== WELCOME)
+      // Compare by content: after a reload the welcome bubble is a new object from sessionStorage.
+      .filter((m) => m.content !== WELCOME.content)
       .slice(-MAX_HISTORY)
       .map(({ role, content }) => ({ role, content }));
 
@@ -66,7 +67,9 @@ export default function ChatWidget() {
       const { data } = await axios.post(`${API}/chat`, { message: trimmed, history });
       setMessages((prev) => [...prev, { role: "assistant", content: data.reply }]);
     } catch (err) {
-      const detail = err?.response?.data?.detail;
+      // FastAPI validation errors return an array here — never render a non-string.
+      const raw = err?.response?.data?.detail;
+      const detail = typeof raw === "string" ? raw : "";
       setMessages((prev) => [
         ...prev,
         {
@@ -109,6 +112,18 @@ export default function ChatWidget() {
                   <p className="text-[11px] text-slate-500">About projects, skills &amp; hiring {me.first}</p>
                 </span>
               </div>
+              <div className="flex items-center gap-1">
+              <a
+                href={`${me.wa}?text=${encodeURIComponent("Hi Ram, I found your portfolio and want to discuss a project.")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Chat on WhatsApp instead"
+                title="Chat on WhatsApp"
+                data-testid="chat-whatsapp-link"
+                className="grid h-8 w-8 place-items-center rounded-full text-[#25D366] transition-colors duration-200 hover:bg-white/5"
+              >
+                <Phone size={15} />
+              </a>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
@@ -118,9 +133,10 @@ export default function ChatWidget() {
               >
                 <X size={16} />
               </button>
+              </div>
             </div>
 
-            <div className="flex-1 space-y-3 overflow-y-auto px-4 py-4" data-testid="chat-messages">
+            <div className="flex-1 space-y-3 overflow-y-auto overscroll-contain px-4 py-4" data-testid="chat-messages" data-lenis-prevent>
               {messages.map((m, i) => (
                 <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
                   <div

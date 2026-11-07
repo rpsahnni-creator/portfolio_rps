@@ -30,8 +30,9 @@ ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
 EMAIL_FROM_NAME = os.environ.get("EMAIL_FROM_NAME", "Ram Pravesh Sahni")
-EMAIL_REPLY_TO = os.environ.get("EMAIL_REPLY_TO")
 OWNER_EMAIL = os.environ["OWNER_EMAIL"]
+# When mail goes out from a no-reply sender, a client's reply must still reach the owner.
+EMAIL_REPLY_TO = os.environ.get("EMAIL_REPLY_TO") or OWNER_EMAIL
 JWT_SECRET = os.environ["JWT_SECRET"]
 JWT_ALGORITHM = "HS256"
 ADMIN_EMAIL = os.environ["ADMIN_EMAIL"].lower()
@@ -49,6 +50,8 @@ api_router = APIRouter(prefix="/api")
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+# httpx logs every request URL at INFO; keep outbound API calls out of the logs.
+logging.getLogger("httpx").setLevel(logging.WARNING)
 
 
 def get_client_ip(request: Request) -> str:
@@ -489,6 +492,8 @@ class TrackIn(BaseModel):
 async def track_view(t: TrackIn, request: Request):
     if not t.path.startswith("/"):
         raise HTTPException(status_code=400, detail="bad path")
+    if not await _rate_ok(get_client_ip(request), kind="track", limit=30, window=600):
+        return {"status": "ignored"}
     pool = get_pool()
     ua = request.headers.get("user-agent", "")[:300]
     await pool.execute(
@@ -619,7 +624,8 @@ async def get_file(fid: str):
     doc = await pool.fetchrow("SELECT content_type, data FROM files WHERE id=$1", fid)
     if not doc:
         raise HTTPException(status_code=404, detail="File not found")
-    return Response(content=bytes(doc["data"]), media_type=doc["content_type"])
+    return Response(content=bytes(doc["data"]), media_type=doc["content_type"],
+                    headers={"Cache-Control": "public, max-age=31536000, immutable"})
 
 
 @api_router.get("/resume")
@@ -628,8 +634,11 @@ async def get_resume():
     doc = await pool.fetchrow("SELECT filename, data FROM files WHERE id='resume'")
     if not doc:
         raise HTTPException(status_code=404, detail="No resume uploaded yet")
+    # Uploaded filenames can contain quotes or non-Latin-1 characters, which would break
+    # (or inject into) the header — serve a fixed, safe name instead.
     return Response(content=bytes(doc["data"]), media_type="application/pdf",
-                    headers={"Content-Disposition": f'inline; filename="{doc["filename"] or "resume.pdf"}"'})
+                    headers={"Content-Disposition": 'inline; filename="Ram-Pravesh-Sahni-Resume.pdf"',
+                             "Cache-Control": "public, max-age=300"})
 
 # ---------------- Email (contact form) ----------------
 
@@ -706,8 +715,15 @@ def _assert_safe_email(subject: str, html: str) -> None:
                 raise ValueError(f"Anchor text {m.group(1)!r} != real link host {real!r} (G3)")
 
 
-async def send_email(*, to: str, subject: str, html: str, reply_to: str | None = None) -> None:
-    _assert_safe_email(subject, html)
+async def send_email(*, to: str, subject: str, html: str, reply_to: str | None = None,
+                     scan: tuple[str, str] | None = None) -> None:
+    # `scan` lets a caller run the safety check on its own template instead of the final
+    # HTML, so quoted visitor text (e.g. "we need CVV validation") can't block a notification.
+    try:
+        _assert_safe_email(*(scan or (subject, html)))
+    except ValueError as e:
+        logger.error(f"Email blocked by safety check: {e}")
+        raise HTTPException(status_code=400, detail="This email could not be sent")
     if not SMTP_HOST:
         logger.warning("SMTP not configured — email not sent")
         raise HTTPException(status_code=503, detail="Email is temporarily unavailable")
@@ -750,6 +766,7 @@ async def _rate_ok(ip: str, kind: str = "contact", limit: int = 5, window: int =
 # ---------------- Chatbot ----------------
 
 CONTACT_EMAIL = "rpsahnni@gmail.com"
+CONTACT_PHONE = "+91 90396 93335"
 
 CHAT_PROVIDER = os.environ.get("CHAT_PROVIDER", "").strip().lower()
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "").strip()
@@ -825,7 +842,7 @@ async def _build_chat_system_prompt() -> str:
         f"SERVICES:\n{services_txt}\n\n"
         "CONTACT:\n"
         f"- Email: {CONTACT_EMAIL}\n"
-        "- Phone / WhatsApp: +91 90396 93335\n"
+        f"- Phone / WhatsApp: {CONTACT_PHONE} (wa.me/919039693335)\n"
         "- GitHub: github.com/rpsahnni-creator — LinkedIn: linkedin.com/in/rp-sahnni\n"
         "- There is also a contact form on this site (the 'Let's build something' section) that sends the "
         "enquiry straight to him.\n"
@@ -872,7 +889,8 @@ async def _call_gemini(system: str, messages: list[dict]) -> str:
     async with httpx.AsyncClient(timeout=30) as client:
         resp = await client.post(
             f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_CHAT_MODEL}:generateContent",
-            params={"key": GEMINI_API_KEY},
+            # Header, not ?key= — a query-string key ends up in httpx/proxy access logs.
+            headers={"x-goog-api-key": GEMINI_API_KEY},
             json={
                 "system_instruction": {"parts": [{"text": system}]},
                 "contents": contents,
@@ -883,6 +901,24 @@ async def _call_gemini(system: str, messages: list[dict]) -> str:
         data = resp.json()
         parts = data["candidates"][0]["content"]["parts"]
         return "".join(p.get("text", "") for p in parts).strip()
+
+
+def _normalize_history(history: list[ChatMessage], message: str) -> list[dict]:
+    # LLM APIs (Anthropic especially) reject a conversation that starts with an assistant
+    # turn — e.g. the widget's welcome bubble — or has two same-role turns in a row.
+    out: list[dict] = []
+    for m in history:
+        if not out and m.role != "user":
+            continue
+        if out and out[-1]["role"] == m.role:
+            out[-1]["content"] += "\n\n" + m.content
+        else:
+            out.append({"role": m.role, "content": m.content})
+    if out and out[-1]["role"] == "user":
+        out[-1]["content"] += "\n\n" + message
+    else:
+        out.append({"role": "user", "content": message})
+    return out
 
 
 @api_router.post("/chat")
@@ -902,8 +938,7 @@ async def chat(payload: ChatIn, request: Request):
         }
 
     system = await _build_chat_system_prompt()
-    messages = [{"role": m.role, "content": m.content} for m in payload.history[-10:]]
-    messages.append({"role": "user", "content": payload.message})
+    messages = _normalize_history(payload.history[-10:], payload.message)
 
     try:
         if provider == "anthropic":
@@ -930,6 +965,9 @@ class ContactIn(BaseModel):
     name: str = Field(min_length=2, max_length=120)
     email: EmailStr
     message: str = Field(min_length=10, max_length=4000)
+    phone: str = Field(default="", max_length=40)
+    # Honeypot: hidden from humans in the form; bots that fill every field get silently dropped.
+    website: str = Field(default="", max_length=200)
 
 
 @api_router.get("/")
@@ -939,16 +977,29 @@ async def root():
 
 @api_router.post("/contact")
 async def create_enquiry(payload: ContactIn, request: Request):
+    if payload.website.strip():
+        logger.info("Contact honeypot triggered — dropping submission")
+        return {"status": "ok", "id": str(uuid.uuid4()), "emailed": True}
+
     ip = get_client_ip(request)
     if not await _rate_ok(ip):
         raise HTTPException(status_code=429, detail="Too many messages. Please try again later.")
 
+    # CR/LF in the name would make EmailMessage raise when it goes into the Subject header.
+    name = " ".join(payload.name.split())
+    phone = " ".join(payload.phone.split())
+    message = payload.message.strip()
+    if len(name) < 2 or len(message) < 10:
+        raise HTTPException(status_code=422, detail="Please fill in your name and a short message")
+    if phone:
+        message = f"{message}\n\nPhone / WhatsApp: {phone}"
+
     pool = get_pool()
     doc = {
         "id": str(uuid.uuid4()),
-        "name": payload.name,
+        "name": name,
         "email": payload.email,
-        "message": payload.message,
+        "message": message,
         "created_at": datetime.now(timezone.utc).isoformat(),
     }
     await pool.execute(
@@ -956,23 +1007,27 @@ async def create_enquiry(payload: ContactIn, request: Request):
         doc["id"], doc["name"], doc["email"], doc["message"], doc["created_at"],
     )
 
-    name_e = escape(payload.name)
-    email_e = escape(payload.email)
-    msg_e = escape(payload.message).replace("\n", "<br/>")
+    def owner_html_for(n: str, e: str, m: str) -> str:
+        return (
+            '<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="padding:24px;'
+            'font-family:Arial,sans-serif;color:#111827">'
+            f'<h2 style="margin:0 0 16px;font-size:18px">New enquiry on {escape(EMAIL_FROM_NAME)}</h2>'
+            f'<p style="margin:0 0 8px"><strong>Name:</strong> {n}</p>'
+            f'<p style="margin:0 0 8px"><strong>Email:</strong> <a href="mailto:{e}">{e}</a></p>'
+            f'<p style="margin:16px 0 4px"><strong>Message:</strong></p>'
+            f'<p style="margin:0;padding:12px;background:#f3f4f6;border-radius:8px">{m}</p>'
+            '<p style="margin:16px 0 0;font-size:13px">Just hit Reply — it goes straight to the client.</p>'
+            f'<p style="margin:24px 0 0;font-size:12px;color:#6b7280">Sent by the contact form on {escape(EMAIL_FROM_NAME)}. '
+            'We never ask for your password or card details by email.</p>'
+            '</td></tr></table>'
+        )
 
-    owner_subject = f"New project enquiry from {payload.name[:60]}"
-    owner_html = (
-        '<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="padding:24px;'
-        'font-family:Arial,sans-serif;color:#111827">'
-        f'<h2 style="margin:0 0 16px;font-size:18px">New enquiry on {escape(EMAIL_FROM_NAME)}</h2>'
-        f'<p style="margin:0 0 8px"><strong>Name:</strong> {name_e}</p>'
-        f'<p style="margin:0 0 8px"><strong>Email:</strong> <a href="mailto:{email_e}">{email_e}</a></p>'
-        f'<p style="margin:16px 0 4px"><strong>Message:</strong></p>'
-        f'<p style="margin:0;padding:12px;background:#f3f4f6;border-radius:8px">{msg_e}</p>'
-        f'<p style="margin:24px 0 0;font-size:12px;color:#6b7280">Sent by the contact form on {escape(EMAIL_FROM_NAME)}. '
-        'We never ask for your password or card details by email.</p>'
-        '</td></tr></table>'
-    )
+    name_e = escape(name)
+    email_e = escape(payload.email)
+    msg_e = escape(message).replace("\n", "<br/>")
+
+    owner_subject = f"New project enquiry from {name[:60]}"
+    owner_html = owner_html_for(name_e, email_e, msg_e)
 
     visitor_subject = "Thanks for reaching out"
     visitor_html = (
@@ -980,6 +1035,7 @@ async def create_enquiry(payload: ContactIn, request: Request):
         'font-family:Arial,sans-serif;color:#111827">'
         f'<p style="margin:0 0 12px">Hi {name_e},</p>'
         '<p style="margin:0 0 12px">Thanks for your enquiry — I have received your message and will reply within a day.</p>'
+        f'<p style="margin:0 0 12px">Need a faster answer? Call or WhatsApp me on {escape(CONTACT_PHONE)}.</p>'
         '<p style="margin:0 0 12px">— Ram Pravesh Sahni, Full-Stack, Mobile &amp; AI Automation Developer</p>'
         f'<p style="margin:24px 0 0;font-size:12px;color:#6b7280">Sent by {escape(EMAIL_FROM_NAME)}. '
         'We never ask for your password or card details by email.</p>'
@@ -988,11 +1044,18 @@ async def create_enquiry(payload: ContactIn, request: Request):
 
     emailed = True
     try:
-        await send_email(to=OWNER_EMAIL, subject=owner_subject, html=owner_html)
-        await send_email(to=payload.email, subject=visitor_subject, html=visitor_html)
+        # Reply-To = visitor, so hitting "Reply" in the inbox goes straight to the client.
+        await send_email(
+            to=OWNER_EMAIL, subject=owner_subject, html=owner_html, reply_to=payload.email,
+            scan=("New project enquiry", owner_html_for("Visitor", "visitor@example.com", "Message")),
+        )
     except HTTPException:
         emailed = False
-        logger.warning(f"Enquiry {doc['id']} saved but email notification failed")
+        logger.warning(f"Enquiry {doc['id']} saved but owner notification failed")
+    try:
+        await send_email(to=payload.email, subject=visitor_subject, html=visitor_html)
+    except HTTPException:
+        logger.warning(f"Enquiry {doc['id']} saved but visitor confirmation failed")
 
     return {"status": "ok", "id": doc["id"], "emailed": emailed}
 
@@ -1002,7 +1065,7 @@ app.include_router(api_router)
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', 'http://localhost:3000').split(','),
+    allow_origins=[o.strip() for o in os.environ.get('CORS_ORIGINS', 'http://localhost:3000').split(',') if o.strip()],
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -1010,6 +1073,12 @@ app.add_middleware(
 
 @app.on_event("startup")
 async def startup():
+    if JWT_SECRET in ("replace-with-a-long-random-value", "change-me") or len(JWT_SECRET) < 16:
+        logger.warning("JWT_SECRET looks like a placeholder — set a long random value before going live")
+    if OWNER_EMAIL.endswith("@example.com"):
+        logger.warning("OWNER_EMAIL is still a placeholder — contact-form notifications will go nowhere")
+    if not SMTP_HOST:
+        logger.warning("SMTP_HOST not set — enquiries are saved but no email notification is sent")
     await init_pool()
     await init_schema()
     await seed_admin()

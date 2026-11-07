@@ -43,7 +43,7 @@ function CardBody({ p }) {
         <span className="text-slate-600">&gt; </span>{p.hi}
       </p>
       <div className="flex flex-wrap gap-2">
-        {p.k.map((x) => (
+        {(p.k || []).map((x) => (
           <span
             key={x}
             className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 font-mono text-[11px] text-slate-300 transition-colors duration-200 group-hover:border-emerald-400/30"
@@ -125,7 +125,7 @@ export default function Projects() {
       <motion.div layout className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-6">
         <AnimatePresence mode="popLayout">
           {list.map((p) => (
-            <ProjectCard key={p.t} p={p} onOpen={setSelected} />
+            <ProjectCard key={p.id || p.t} p={p} onOpen={setSelected} />
           ))}
         </AnimatePresence>
       </motion.div>

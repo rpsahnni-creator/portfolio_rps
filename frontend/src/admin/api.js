@@ -1,6 +1,7 @@
 import axios from "axios";
 
-export const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+import { API, absUrl } from "../lib/backend";
+export { API, absUrl };
 
 export const adminApi = axios.create({ baseURL: API, withCredentials: true });
 
@@ -10,7 +11,6 @@ adminApi.interceptors.request.use((cfg) => {
   return cfg;
 });
 
-export const absUrl = (u) => (u && u.startsWith("/api/") ? `${process.env.REACT_APP_BACKEND_URL}${u}` : u);
 
 export const fmtErr = (e) => {
   const d = e?.response?.data?.detail;

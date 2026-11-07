@@ -18,6 +18,7 @@ import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
 import ChatWidget from "@/components/ChatWidget";
 import Admin from "@/pages/Admin";
+import { API } from "@/lib/backend";
 
 function Intro() {
   return (
@@ -56,7 +57,7 @@ function Portfolio() {
       sid = Math.random().toString(36).slice(2);
       localStorage.setItem("pv_sid", sid);
     }
-    fetch(`${process.env.REACT_APP_BACKEND_URL}/api/track`, {
+    fetch(`${API}/track`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ path: window.location.pathname, sid, ref: document.referrer.slice(0, 300) }),
@@ -106,7 +107,7 @@ export default function App() {
           <Route path="/admin" element={<Admin />} />
         </Routes>
       </BrowserRouter>
-      <Toaster theme={theme}position="bottom-right" richColors />
+      <Toaster theme={theme} position="bottom-right" richColors />
     </ContentProvider>
   );
 }
