@@ -38,9 +38,12 @@ def test_content_has_seeded_defaults(client):
     r = client.get("/api/content")
     assert r.status_code == 200
     body = r.json()
-    # 6 placeholder defaults + every real showcase project, newest showcase entry first.
-    from server import SHOWCASE_PROJECTS
-    assert len(body["projects"]) == 6 + len(SHOWCASE_PROJECTS)
+    # Placeholder defaults + every real showcase project, first showcase entry on top.
+    from server import DEFAULT_PROJECTS, RETIRED_PROJECT_TITLES, SHOWCASE_PROJECTS
+    assert len(body["projects"]) == len(DEFAULT_PROJECTS) + len(SHOWCASE_PROJECTS)
+    assert not {p["t"] for p in body["projects"]} & set(RETIRED_PROJECT_TITLES)
+    top = [p["t"] for p in body["projects"][: len(SHOWCASE_PROJECTS)]]
+    assert top == [p["title"] for p in SHOWCASE_PROJECTS]
     assert body["projects"][0]["t"] == SHOWCASE_PROJECTS[0]["title"]
     assert len(body["skills"]) == 6
     assert len(body["testimonials"]) == 4
@@ -285,3 +288,17 @@ def test_showcase_project_is_seeded_once_and_stays_deleted(client):
     client.portal.call(seed_showcase)  # what the next deploy/restart runs
     rows = [p for p in client.get("/api/admin/projects", headers=headers).json() if p["title"] == title]
     assert rows == []
+
+
+def test_retired_placeholder_is_removed_once(client):
+    from server import RETIRED_PROJECT_TITLES, retire_placeholders
+
+    headers = _auth_headers(client)
+    title = RETIRED_PROJECT_TITLES[0]
+    payload = {"title": title, "cat": "backend", "desc": "Re-added by hand in the admin panel."}
+    pid = client.post("/api/admin/projects", json=payload, headers=headers).json()["id"]
+
+    client.portal.call(retire_placeholders)  # next restart must not delete it again
+    titles = [p["title"] for p in client.get("/api/admin/projects", headers=headers).json()]
+    assert title in titles
+    assert client.delete(f"/api/admin/projects/{pid}", headers=headers).status_code == 200

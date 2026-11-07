@@ -183,7 +183,6 @@ CAT_LABELS = {"backend": "Backend", "web": "Web", "mobile": "Mobile", "ai": "AI 
 SPAN_PATTERN = ["lg:col-span-3", "lg:col-span-3", "lg:col-span-2", "lg:col-span-2", "lg:col-span-2"]
 
 DEFAULT_PROJECTS = [
-    {"title": "Billing & Invoice API", "cat": "backend", "desc": "High-concurrency microservice handling secure invoice generation, PDF exports and payment gateway webhooks for multiple tenants.", "hi": "RBAC · PDF invoices · payment webhooks", "tech": ["Django", "PostgreSQL", "Docker", "AWS"], "featured": True, "order": 0, "img": "https://images.unsplash.com/photo-1759661881353-5b9cc55e1cf4?crop=entropy&cs=srgb&fm=jpg&q=85", "features": ["Multi-tenant architecture with role-based access control", "PDF invoice generation with branded templates", "Payment gateway webhooks with retry-safe handling", "Containerised with Docker and deployed on AWS"], "outcome": "One API serves every tenant — billing runs end to end without manual work.", "gh": "https://github.com/rpsahnni-creator", "live": ""},
     {"title": "Realtime Chat Service", "cat": "backend", "desc": "Ultra-low latency WebSocket chat server supporting 10k+ concurrent connections with pub/sub architecture and message history.", "hi": "10k+ concurrent sockets · Redis pub/sub", "tech": ["Golang", "Redis", "PostgreSQL"], "featured": False, "order": 1, "img": "https://images.pexels.com/photos/26765065/pexels-photo-26765065.png?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940", "features": ["WebSocket server in Go built for high throughput", "Redis pub/sub fan-out across multiple nodes", "Persistent message history in PostgreSQL", "Graceful reconnects and presence tracking"], "outcome": "10k+ concurrent connections stay live with sub-second message delivery.", "gh": "https://github.com/rpsahnni-creator", "live": ""},
     {"title": "Business Dashboard", "cat": "web", "desc": "Analytics & financial management portal featuring real-time telemetry, charts and exportable reports behind secure login.", "hi": "Live telemetry · exportable reports", "tech": ["React", "TypeScript", "Tailwind CSS"], "featured": False, "order": 2, "img": "https://images.pexels.com/photos/9951077/pexels-photo-9951077.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940", "features": ["Real-time charts and KPI telemetry", "Secure authentication and session handling", "Exportable PDF/CSV reports", "Fast loads with TypeScript-safe data layer"], "outcome": "Owners see the whole business on one screen and export reports in a click.", "gh": "https://github.com/rpsahnni-creator", "live": ""},
     {"title": "Delivery Tracking App", "cat": "mobile", "desc": "Cross-platform mobile application with live GPS driver movement, push alerts and full order lifecycle management.", "hi": "Live GPS tracking · push notifications", "tech": ["Flutter", "Firebase", "FastAPI"], "featured": False, "order": 3, "img": "https://images.unsplash.com/photo-1759661881353-5b9cc55e1cf4?crop=entropy&cs=srgb&fm=jpg&q=85", "features": ["Single Flutter codebase for Android and iOS", "Live driver GPS movement on maps", "Push notifications at every order stage", "FastAPI backend with Firebase sync"], "outcome": "Customers watch their delivery move in real time, from pickup to doorstep.", "gh": "https://github.com/rpsahnni-creator", "live": ""},
@@ -212,10 +211,12 @@ DEFAULT_TESTIMONIALS = [
 # table), each of these is inserted exactly once per database — tracked by `key` in
 # seed_markers — so a new entry here reaches production on the next deploy, while an
 # admin can still edit or delete it afterwards without it reappearing.
-# Add new projects at the TOP of this list: the first entry shows first on the site.
+# `order` is the fixed position on the site (lower = higher up; the placeholders use 0-5).
+# Leave gaps so a new project can slot in between, and keep the list in display order.
 SHOWCASE_PROJECTS = [
     {
         "key": "kijibooks",
+        "order": -300,
         "title": "KijiBooks — GST Billing & Accounting SaaS",
         "cat": "web",
         "desc": (
@@ -244,6 +245,7 @@ SHOWCASE_PROJECTS = [
     },
     {
         "key": "kijibestiee",
+        "order": -200,
         "title": "KijiBestiee — Bilingual Exam-Prep Platform",
         "cat": "web",
         "desc": (
@@ -274,31 +276,93 @@ SHOWCASE_PROJECTS = [
         "gh": "",
         "live": "https://kijibestiee.kijitechnology.in",
     },
+    {
+        "key": "navya-society-manager",
+        "order": -100,
+        "title": "Navya Sen Naman Vatika — Society Management App",
+        "cat": "mobile",
+        "desc": (
+            "A live society-management platform for the Navya Sen Naman Vatika Flat Owners Association in Deoghar, built and maintained (AMC) by Kiji Technology. The committee, gate guards and residents each get their own web dashboard and a native Flutter Android app on one Django REST backend: maintenance bills are generated every month automatically, residents pay by UPI in a tap, and the admin verifies each payment against the bank statement before a PDF receipt is emailed."
+        ),
+        "hi": "Live · Web + Flutter Android app · Auto-billing & UPI payments",
+        "tech": ["React", "TypeScript", "Vite", "Tailwind CSS", "Django", "Django REST Framework", "PostgreSQL", "Flutter"],
+        "featured": True,
+        "img": "/projects/navya-society-manager.webp",
+        "features": [
+            "Three roles with their own dashboards: committee admin, gate guard, and flat owner/tenant (who signs in with a mobile number)",
+            "Bills generated automatically on the 1st of every month from each flat's maintenance charge, with overdue reminders by email",
+            "UPI “Pay Now” to the society's bank QR: residents submit the transaction ID, the admin verifies it against the bank statement, and the bill is marked paid for both owner and tenant",
+            "PDF bills and receipts, emailed to the owner and the tenant and downloadable any time",
+            "Gate desk for guards: visitor log, owner directory with call and gate-to-owner chat, and SOS alerts",
+            "Community tools: notice board, broadcast messages, amenities, complaints, expenses and service providers",
+            "Native Flutter Android app on the same backend, with guard shift attendance and a monthly Excel export",
+            "One-command import of the society's Excel flat register (flats, owners, tenants and charges), safe to re-run to keep records in sync",
+            "JWT sign-in with password or email OTP, a mobile-responsive UI and production health checks",
+        ],
+        "outcome": (
+            "The association now runs billing, collections, gate security and notices from one system, and every payment is traceable to a verified bank transaction."
+        ),
+        "gh": "",
+        "live": "https://nsnv.kijitechnology.in",
+    },
 ]
+
+
+# Placeholder projects replaced by a real one. Each is deleted once per database
+# (tracked in seed_markers), so re-adding it by hand in the admin panel sticks.
+RETIRED_PROJECT_TITLES = [
+    "Billing & Invoice API",  # replaced by KijiBooks
+]
+
+
+async def retire_placeholders():
+    pool = get_pool()
+    for title in RETIRED_PROJECT_TITLES:
+        async with pool.acquire() as conn, conn.transaction():
+            claimed = await conn.fetchval(
+                "INSERT INTO seed_markers (key, applied_at) VALUES ($1,$2) ON CONFLICT DO NOTHING RETURNING key",
+                f"retire:{title}", datetime.now(timezone.utc).isoformat(),
+            )
+            if claimed:
+                res = await conn.execute("DELETE FROM projects WHERE title=$1", title)
+                logger.info(f"Retired placeholder project {title!r} ({res})")
+
+
+# Bump when `order` values of already-seeded projects change, to re-apply them once.
+SHOWCASE_ORDER_VERSION = 1
 
 
 async def seed_showcase():
     pool = get_pool()
-    # Reversed: each insert takes the lowest sort order, so the list's first entry ends up on top.
-    for p in reversed(SHOWCASE_PROJECTS):
+    now = datetime.now(timezone.utc).isoformat()
+    for p in SHOWCASE_PROJECTS:
         async with pool.acquire() as conn, conn.transaction():
             # Claiming the marker first makes this safe with several workers starting at once.
             claimed = await conn.fetchval(
                 "INSERT INTO seed_markers (key, applied_at) VALUES ($1,$2) ON CONFLICT DO NOTHING RETURNING key",
-                f"project:{p['key']}", datetime.now(timezone.utc).isoformat(),
+                f"project:{p['key']}", now,
             )
             if not claimed:
                 continue
-            top = await conn.fetchval("SELECT COALESCE(MIN(sort_order), 0) FROM projects")
             await conn.execute(
                 """INSERT INTO projects (id,title,cat,description,hi,tech,featured,sort_order,img,features,outcome,gh,live)
                    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)""",
                 str(uuid.uuid4()), p["title"], p["cat"], p["desc"], p.get("hi", ""),
-                json.dumps(p.get("tech", [])), p.get("featured", False), top - 1,
+                json.dumps(p.get("tech", [])), p.get("featured", False), p["order"],
                 p.get("img", ""), json.dumps(p.get("features", [])), p.get("outcome", ""),
                 p.get("gh", ""), p.get("live", ""),
             )
             logger.info(f"Showcase project added: {p['title']}")
+
+    # Projects seeded before positions were fixed got ad-hoc sort orders; line them up once.
+    async with pool.acquire() as conn, conn.transaction():
+        claimed = await conn.fetchval(
+            "INSERT INTO seed_markers (key, applied_at) VALUES ($1,$2) ON CONFLICT DO NOTHING RETURNING key",
+            f"showcase-order:v{SHOWCASE_ORDER_VERSION}", now,
+        )
+        if claimed:
+            for p in SHOWCASE_PROJECTS:
+                await conn.execute("UPDATE projects SET sort_order=$1 WHERE title=$2", p["order"], p["title"])
 
 
 async def seed_content():
@@ -1177,6 +1241,7 @@ async def startup():
     await seed_admin()
     await seed_content()
     await seed_showcase()
+    await retire_placeholders()
 
 
 @app.on_event("shutdown")
