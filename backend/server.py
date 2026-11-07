@@ -302,6 +302,35 @@ SHOWCASE_PROJECTS = [
         "live": "https://kijibestiee.kijitechnology.in",
     },
     {
+        "key": "kiji-online-test",
+        "order": -150,
+        "title": "Kiji Technology Online Test — Exam Platform for Web & Mobile",
+        "cat": "backend",
+        "desc": (
+            "A multi-client online examination platform built for Kiji Technology. Admins build a bilingual (English & Hindi) question bank — including bulk DOCX and PDF imports with Hindi OCR — and publish timed exams; students take them in a Next.js web app or an Expo / React Native mobile app, with a live timer, auto-save, auto-submit and instant scoring. A Django + Django-Ninja API runs on PostgreSQL, Redis and isolated Celery queues, and an optional Go exam engine serves the busiest student paths and the realtime WebSocket feed."
+        ),
+        "hi": "Django + Go exam engine · Next.js web & Expo mobile · English / Hindi",
+        "tech": ["Django", "Django-Ninja", "Go", "Next.js", "React Native", "PostgreSQL", "Redis", "Celery"],
+        "featured": True,
+        "img": "/projects/kiji-online-test.webp",
+        "features": [
+            "Full exam lifecycle: question bank → bulk import and review → exam wizard (duration, 25/50/100-question presets, sections, marks and negative marking) → publish → attempt → result and answer review",
+            "Bulk question import from CSV, DOCX and PDF, with Tesseract OCR (including Hindi) for scanned papers and a review-and-approve step before anything goes live",
+            "Every published exam is frozen as a paper snapshot, so editing a question later never changes the score of an attempt already submitted",
+            "Exam engine with a server-authoritative WebSocket timer, batched answer saving, mark-for-review, a duplicate-submit guard and auto-submit when time runs out",
+            "Scoring with configurable positive and negative marks, section-wise summaries, time taken, ranks and percentiles, plus exam-wise leaderboards",
+            "Proctoring signals: tab switches, app backgrounding, screen capture and fullscreen exits are logged per attempt; the mobile app blocks screenshots where the OS allows and keeps the screen awake",
+            "Admin console on web and mobile — dashboard, questions, exams, students, results with CSV export, notifications, security and audit logs — with Super Admin, Admin and Content Manager roles",
+            "Secure sign-in: OTP for students, TOTP two-factor for staff, cookie sessions on the web and secure-store tokens on mobile, with push notifications when results are ready",
+            "Built for exam-day load: the Go engine takes over hot student APIs, dedicated Celery queues keep imports, scoring and notifications off the exam path, and Prometheus, Sentry and request IDs trace every call across Go, Python and Celery",
+        ],
+        "outcome": (
+            "Kiji Technology can run timed, bilingual online exams end to end — from importing a question paper to publishing ranked results — for students on the web or on their phones, all from one admin console."
+        ),
+        "gh": "",
+        "live": "https://test.kijitechnology.in",
+    },
+    {
         "key": "navya-society-manager",
         "order": -100,
         "title": "Navya Sen Naman Vatika — Society Management App",
