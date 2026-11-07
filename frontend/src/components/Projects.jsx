@@ -21,6 +21,11 @@ function CardVisual({ p, tall }) {
       <span className="absolute left-3 top-3 rounded-full border border-[rgba(255,255,255,0.2)] bg-[rgba(7,10,15,0.55)] px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[#6ee7b7] backdrop-blur">
         {p.cl}
       </span>
+      {p.live && (
+        <span className="absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-[rgba(7,10,15,0.7)] px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[#fde68a] backdrop-blur">
+          <span className="h-1.5 w-1.5 rounded-full bg-[#34d399] animate-pulse-dot" /> Live
+        </span>
+      )}
       <span className="absolute bottom-1 right-4 font-display text-6xl font-extrabold text-[rgba(255,255,255,0.2)]" aria-hidden="true">
         {p.n}
       </span>

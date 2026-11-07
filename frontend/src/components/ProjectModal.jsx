@@ -103,7 +103,7 @@ export default function ProjectModal({ p, onClose }) {
                   data-testid="project-modal-live-link"
                   className="inline-flex items-center gap-2 rounded-full border border-white/15 px-5 py-2.5 text-xs font-bold text-slate-100 transition-all hover:-translate-y-0.5 hover:border-emerald-400/60 hover:text-emerald-300"
                 >
-                  Live demo <ArrowUpRight size={13} />
+                  Visit live app <ArrowUpRight size={13} />
                 </a>
               )}
               <a

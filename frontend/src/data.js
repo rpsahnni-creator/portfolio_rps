@@ -56,7 +56,34 @@ export const filters = [
   ["ai", "AI & Automation"],
 ];
 
-export const projects = [
+// Fallback list, used only if the API can't be reached — keep it in sync with
+// SHOWCASE_PROJECTS / DEFAULT_PROJECTS in backend/server.py. Card numbers are computed below.
+const projectList = [
+  {
+    id: "project-kijibestiee",
+    t: "KijiBestiee — Bilingual Exam-Prep Platform",
+    c: "web",
+    cl: "Web",
+    d: "A live, bilingual (English & Hindi) exam-preparation platform built end to end for Kiji Technology OPC Pvt. Ltd. University students prepare for their FYUGP Semester-I exams with chapter-wise study notes and 4,235+ practice MCQs across four courses, then unlock subjects through Razorpay payments or UPI AutoPay. One React Native codebase serves web and mobile, backed by a FastAPI + PostgreSQL API and a full admin console for students, orders and revenue.",
+    hi: "Live in production · 4,235+ bilingual MCQs · Razorpay & UPI AutoPay",
+    k: ["React Native", "Expo", "TypeScript", "FastAPI", "PostgreSQL", "SQLAlchemy", "Razorpay", "Sentry"],
+    span: "lg:col-span-6",
+    featured: true,
+    img: "/projects/kijibestiee.webp",
+    features: [
+      "Delivered the whole product: UX, React Native/Expo app (web + Android-ready), FastAPI backend, database and deployment",
+      "Bilingual English/Hindi content with an instant language toggle on every screen",
+      "Quiz engine with timer, instant scoring and answer review with explanations, plus a daily practice streak",
+      "Razorpay checkout with one-time payments, UPI AutoPay e-mandates and a 12-hour free trial — each payment verified three ways (client signature, server check and webhooks)",
+      "Automatic branded email receipts and renewal reminders, capped at one email per student per day",
+      "Account security: single-device login, duplicate-account prevention via phone and canonical-email checks, and rate limiting",
+      "Content protection on paid material: copy, print and dev-tools blocking on the web",
+      "Admin console with revenue and student analytics, manual access grants, password resets, remote logout, receipt resends and a full audit log",
+    ],
+    outcome: "The client launched a paid, self-serve learning product: students sign up, pay and start practising on their own, while the team runs content, access and revenue from one dashboard.",
+    gh: "",
+    live: "https://kijibestiee.kijitechnology.in",
+  },
   {
     id: "project-card-1",
     n: "01",
@@ -185,6 +212,8 @@ export const projects = [
     live: "",
   },
 ];
+
+export const projects = projectList.map((p, i) => ({ ...p, n: String(i + 1).padStart(2, "0") }));
 
 export const skills = [
   { id: "tech-group-backend", name: "Backend", icon: Server, items: ["Python", "Django", "Django REST", "FastAPI", "Golang", "Node.js", "Express.js", "TypeScript", "GraphQL", "Celery"] },

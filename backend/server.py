@@ -208,6 +208,70 @@ DEFAULT_TESTIMONIALS = [
 ]
 
 
+# Real, shipped client projects. Unlike DEFAULT_PROJECTS (only used for an empty
+# table), each of these is inserted exactly once per database — tracked by `key` in
+# seed_markers — so a new entry here reaches production on the next deploy, while an
+# admin can still edit or delete it afterwards without it reappearing.
+# Newest entry goes on top of the list (it gets the lowest sort order when inserted).
+SHOWCASE_PROJECTS = [
+    {
+        "key": "kijibestiee",
+        "title": "KijiBestiee — Bilingual Exam-Prep Platform",
+        "cat": "web",
+        "desc": (
+            "A live, bilingual (English & Hindi) exam-preparation platform built end to end for "
+            "Kiji Technology OPC Pvt. Ltd. University students prepare for their FYUGP Semester-I exams "
+            "with chapter-wise study notes and 4,235+ practice MCQs across four courses, then unlock "
+            "subjects through Razorpay payments or UPI AutoPay. One React Native codebase serves web and "
+            "mobile, backed by a FastAPI + PostgreSQL API and a full admin console for students, orders and revenue."
+        ),
+        "hi": "Live in production · 4,235+ bilingual MCQs · Razorpay & UPI AutoPay",
+        "tech": ["React Native", "Expo", "TypeScript", "FastAPI", "PostgreSQL", "SQLAlchemy", "Razorpay", "Sentry"],
+        "featured": True,
+        "img": "/projects/kijibestiee.webp",
+        "features": [
+            "Delivered the whole product: UX, React Native/Expo app (web + Android-ready), FastAPI backend, database and deployment",
+            "Bilingual English/Hindi content with an instant language toggle on every screen",
+            "Quiz engine with timer, instant scoring and answer review with explanations, plus a daily practice streak",
+            "Razorpay checkout with one-time payments, UPI AutoPay e-mandates and a 12-hour free trial — each payment verified three ways (client signature, server check and webhooks)",
+            "Automatic branded email receipts and renewal reminders, capped at one email per student per day",
+            "Account security: single-device login, duplicate-account prevention via phone and canonical-email checks, and rate limiting",
+            "Content protection on paid material: copy, print and dev-tools blocking on the web",
+            "Admin console with revenue and student analytics, manual access grants, password resets, remote logout, receipt resends and a full audit log",
+        ],
+        "outcome": (
+            "The client launched a paid, self-serve learning product: students sign up, pay and start "
+            "practising on their own, while the team runs content, access and revenue from one dashboard."
+        ),
+        "gh": "",
+        "live": "https://kijibestiee.kijitechnology.in",
+    },
+]
+
+
+async def seed_showcase():
+    pool = get_pool()
+    for p in SHOWCASE_PROJECTS:
+        async with pool.acquire() as conn, conn.transaction():
+            # Claiming the marker first makes this safe with several workers starting at once.
+            claimed = await conn.fetchval(
+                "INSERT INTO seed_markers (key, applied_at) VALUES ($1,$2) ON CONFLICT DO NOTHING RETURNING key",
+                f"project:{p['key']}", datetime.now(timezone.utc).isoformat(),
+            )
+            if not claimed:
+                continue
+            top = await conn.fetchval("SELECT COALESCE(MIN(sort_order), 0) FROM projects")
+            await conn.execute(
+                """INSERT INTO projects (id,title,cat,description,hi,tech,featured,sort_order,img,features,outcome,gh,live)
+                   VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)""",
+                str(uuid.uuid4()), p["title"], p["cat"], p["desc"], p.get("hi", ""),
+                json.dumps(p.get("tech", [])), p.get("featured", False), top - 1,
+                p.get("img", ""), json.dumps(p.get("features", [])), p.get("outcome", ""),
+                p.get("gh", ""), p.get("live", ""),
+            )
+            logger.info(f"Showcase project added: {p['title']}")
+
+
 async def seed_content():
     pool = get_pool()
     if await pool.fetchval("SELECT count(*) FROM projects") == 0:
@@ -1083,6 +1147,7 @@ async def startup():
     await init_schema()
     await seed_admin()
     await seed_content()
+    await seed_showcase()
 
 
 @app.on_event("shutdown")

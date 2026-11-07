@@ -38,7 +38,10 @@ def test_content_has_seeded_defaults(client):
     r = client.get("/api/content")
     assert r.status_code == 200
     body = r.json()
-    assert len(body["projects"]) == 6
+    # 6 placeholder defaults + every real showcase project, newest showcase entry first.
+    from server import SHOWCASE_PROJECTS
+    assert len(body["projects"]) == 6 + len(SHOWCASE_PROJECTS)
+    assert body["projects"][0]["t"] == SHOWCASE_PROJECTS[0]["title"]
     assert len(body["skills"]) == 6
     assert len(body["testimonials"]) == 4
     assert body["resumeUrl"] == ""
@@ -263,3 +266,22 @@ def test_chat_history_is_normalized():
 
     out = _normalize_history([ChatMessage(role="user", content="hello")], "again")
     assert out == [{"role": "user", "content": "hello\n\nagain"}]
+
+
+# ---------------- Showcase projects ----------------
+
+def test_showcase_project_is_seeded_once_and_stays_deleted(client):
+    from server import SHOWCASE_PROJECTS, ProjectIn, seed_showcase
+
+    for p in SHOWCASE_PROJECTS:
+        ProjectIn(**{k: v for k, v in p.items() if k != "key"})  # editable in the admin panel as-is
+
+    headers = _auth_headers(client)
+    title = SHOWCASE_PROJECTS[0]["title"]
+    rows = [p for p in client.get("/api/admin/projects", headers=headers).json() if p["title"] == title]
+    assert len(rows) == 1
+
+    assert client.delete(f"/api/admin/projects/{rows[0]['id']}", headers=headers).status_code == 200
+    client.portal.call(seed_showcase)  # what the next deploy/restart runs
+    rows = [p for p in client.get("/api/admin/projects", headers=headers).json() if p["title"] == title]
+    assert rows == []

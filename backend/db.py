@@ -86,6 +86,13 @@ CREATE TABLE IF NOT EXISTS files (
     created_at TEXT NOT NULL
 );
 
+-- One row per one-time content seed (e.g. a showcase project), so it is applied once
+-- per database and an admin can still edit/delete the result without it coming back.
+CREATE TABLE IF NOT EXISTS seed_markers (
+    key TEXT PRIMARY KEY,
+    applied_at TEXT NOT NULL
+);
+
 -- Safe to re-run: adds columns introduced after a table already existed.
 ALTER TABLE pageviews ADD COLUMN IF NOT EXISTS ua TEXT NOT NULL DEFAULT '';
 ALTER TABLE rate_hits ADD COLUMN IF NOT EXISTS kind TEXT NOT NULL DEFAULT 'contact';
