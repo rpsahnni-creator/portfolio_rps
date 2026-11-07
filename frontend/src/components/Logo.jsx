@@ -1,4 +1,4 @@
-// onDark: fixed light colours for use on a dark coloured surface (e.g. the green footer) in both themes.
+// onDark: fixed yellow wordmark for the deep green footer, the same in both themes.
 export default function Logo({ size = 40, withWordmark = true, onDark = false }) {
   return (
     <span className="inline-flex items-center gap-2.5">
@@ -8,8 +8,8 @@ export default function Logo({ size = 40, withWordmark = true, onDark = false })
         <circle cx="48" cy="45" r="4" fill="#F59E0B" />
       </svg>
       {withWordmark && (
-        <span className={`font-display text-lg font-bold tracking-tight ${onDark ? "text-[#ffffff]" : "text-slate-100"}`}>
-          rpsahnni<span className={onDark ? "text-[#6ee7b7]" : "text-emerald-400"}>.dev</span>
+        <span className={`font-display text-lg font-bold tracking-tight ${onDark ? "text-[#facc15]" : "text-slate-100"}`}>
+          rpsahnni<span className={onDark ? "text-[#fde68a]" : "text-emerald-400"}>.dev</span>
         </span>
       )}
     </span>

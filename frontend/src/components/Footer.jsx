@@ -2,17 +2,20 @@ import { ArrowUp, Facebook, Github, Instagram, Linkedin, Mail } from "lucide-rea
 import { me } from "../data";
 import Logo from "./Logo";
 
-// Deep green footer in both themes — fixed hex colours (not the theme-swapping
-// slate/white tokens) so text stays light and readable on the green background.
+// Deep green footer with yellow text in both themes — fixed hex colours (not the
+// theme-swapping slate/white tokens). Icons sit on white circles so each one can
+// use its original brand colour (GitHub black, LinkedIn blue, ...) and stay visible.
+const YELLOW = "text-[#facc15]";
+
 const iconLink =
-  "grid h-10 w-10 place-items-center rounded-full border border-[rgba(255,255,255,0.18)] bg-[rgba(255,255,255,0.06)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#ffffff]";
+  "grid h-10 w-10 place-items-center rounded-full bg-[#ffffff] shadow-sm shadow-[rgba(0,0,0,0.25)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md";
 
 const BRAND = {
-  github: "text-[#ffffff] hover:text-[#181717]",
-  linkedin: "text-[#7cc4ff] hover:text-[#0A66C2]",
-  instagram: "text-[#ff8fa6] hover:text-[#E4405F]",
-  facebook: "text-[#8fb8ff] hover:text-[#1877F2]",
-  mail: "text-[#6ee7b7] hover:text-[#064e3b]",
+  github: "text-[#181717]",
+  linkedin: "text-[#0A66C2]",
+  instagram: "text-[#E4405F]",
+  facebook: "text-[#1877F2]",
+  mail: "text-[#EA4335]",
 };
 
 export default function Footer() {
@@ -46,8 +49,8 @@ export default function Footer() {
             <ArrowUp size={17} />
           </button>
         </div>
-        <p className="font-mono text-xs tracking-wider text-[#a7f3d0]" data-testid="footer-copyright">
-          © {new Date().getFullYear()} {me.name} · {me.location} · <a href="/admin" data-testid="footer-admin-link" className="text-[#a7f3d0] underline-offset-2 hover:text-[#ffffff] hover:underline">Admin</a>
+        <p className={`font-mono text-xs tracking-wider ${YELLOW}`} data-testid="footer-copyright">
+          © {new Date().getFullYear()} {me.name} · {me.location} · <a href="/admin" data-testid="footer-admin-link" className={`${YELLOW} underline-offset-2 hover:text-[#fde68a] hover:underline`}>Admin</a>
         </p>
       </div>
     </footer>
