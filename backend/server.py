@@ -212,8 +212,36 @@ DEFAULT_TESTIMONIALS = [
 # table), each of these is inserted exactly once per database — tracked by `key` in
 # seed_markers — so a new entry here reaches production on the next deploy, while an
 # admin can still edit or delete it afterwards without it reappearing.
-# Newest entry goes on top of the list (it gets the lowest sort order when inserted).
+# Add new projects at the TOP of this list: the first entry shows first on the site.
 SHOWCASE_PROJECTS = [
+    {
+        "key": "kijibooks",
+        "title": "KijiBooks — GST Billing & Accounting SaaS",
+        "cat": "web",
+        "desc": (
+            "A multi-tenant SaaS for Indian small businesses, built for Kiji Technology OPC Pvt. Ltd.: GST invoicing, POS billing, inventory, payments, expenses and banking in one place, with one-click GST and Tally exports for the accountant. A single Go service runs the API and the embedded React app, PostgreSQL row-level security keeps every business's data isolated, staff bill on the go with a Flutter mobile app, and plans are sold through Razorpay subscriptions."
+        ),
+        "hi": "Multi-tenant SaaS · GSTR-1/3B & Tally exports · Go + PostgreSQL RLS",
+        "tech": ["Go", "React", "TypeScript", "PostgreSQL", "Flutter", "Tailwind CSS", "Razorpay", "Docker"],
+        "featured": True,
+        "img": "/projects/kijibooks.webp",
+        "features": [
+            "Complete billing workflow: sales, POS billing, quotes and orders, purchases, credit/debit notes, repeating bills, payments, banking and expenses",
+            "GST built in: GSTIN validation, place-of-supply rules, and one-click GSTR-1/3B working sheets, GSTR-1 JSON, Tally XML and register exports for the CA",
+            "Tenant isolation in three layers — ORM scoping, PostgreSQL row-level security and a startup check that refuses a privileged database role — proven by tests against a restricted role",
+            "Team roles for owner, admin, accountant, cashier, read-only CA and viewer, with invitations and a full audit trail",
+            "Secure accounts: e-mail verification, login lockout, rotating refresh tokens with reuse detection, rate limiting and security headers",
+            "Free / Starter / Pro / Business plans with a 14-day Pro trial, Razorpay subscriptions, signed idempotent webhooks and plan limits",
+            "Connected to KijiBestiee: every student payment there becomes a GST invoice in Sales automatically",
+            "Businesses add or hide their own fields on sales, purchases, customers, products, expenses and payments",
+            "Production-ready operations: Docker + Caddy, CI, health/readiness/metrics endpoints, JSON logs, Sentry, nightly backups and DPDP/GDPR data export and deletion",
+        ],
+        "outcome": (
+            "One product a business can sign up for and run its daily billing on, with GST-ready books its accountant can file from — built as a SaaS the client can sell to many businesses."
+        ),
+        "gh": "",
+        "live": "",
+    },
     {
         "key": "kijibestiee",
         "title": "KijiBestiee — Bilingual Exam-Prep Platform",
@@ -251,7 +279,8 @@ SHOWCASE_PROJECTS = [
 
 async def seed_showcase():
     pool = get_pool()
-    for p in SHOWCASE_PROJECTS:
+    # Reversed: each insert takes the lowest sort order, so the list's first entry ends up on top.
+    for p in reversed(SHOWCASE_PROJECTS):
         async with pool.acquire() as conn, conn.transaction():
             # Claiming the marker first makes this safe with several workers starting at once.
             claimed = await conn.fetchval(

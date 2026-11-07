@@ -60,6 +60,32 @@ export const filters = [
 // SHOWCASE_PROJECTS / DEFAULT_PROJECTS in backend/server.py. Card numbers are computed below.
 const projectList = [
   {
+    id: "project-kijibooks",
+    t: "KijiBooks — GST Billing & Accounting SaaS",
+    c: "web",
+    cl: "Web",
+    d: "A multi-tenant SaaS for Indian small businesses, built for Kiji Technology OPC Pvt. Ltd.: GST invoicing, POS billing, inventory, payments, expenses and banking in one place, with one-click GST and Tally exports for the accountant. A single Go service runs the API and the embedded React app, PostgreSQL row-level security keeps every business's data isolated, staff bill on the go with a Flutter mobile app, and plans are sold through Razorpay subscriptions.",
+    hi: "Multi-tenant SaaS · GSTR-1/3B & Tally exports · Go + PostgreSQL RLS",
+    k: ["Go", "React", "TypeScript", "PostgreSQL", "Flutter", "Tailwind CSS", "Razorpay", "Docker"],
+    span: "lg:col-span-6",
+    featured: true,
+    img: "/projects/kijibooks.webp",
+    features: [
+      "Complete billing workflow: sales, POS billing, quotes and orders, purchases, credit/debit notes, repeating bills, payments, banking and expenses",
+      "GST built in: GSTIN validation, place-of-supply rules, and one-click GSTR-1/3B working sheets, GSTR-1 JSON, Tally XML and register exports for the CA",
+      "Tenant isolation in three layers — ORM scoping, PostgreSQL row-level security and a startup check that refuses a privileged database role — proven by tests against a restricted role",
+      "Team roles for owner, admin, accountant, cashier, read-only CA and viewer, with invitations and a full audit trail",
+      "Secure accounts: e-mail verification, login lockout, rotating refresh tokens with reuse detection, rate limiting and security headers",
+      "Free / Starter / Pro / Business plans with a 14-day Pro trial, Razorpay subscriptions, signed idempotent webhooks and plan limits",
+      "Connected to KijiBestiee: every student payment there becomes a GST invoice in Sales automatically",
+      "Businesses add or hide their own fields on sales, purchases, customers, products, expenses and payments",
+      "Production-ready operations: Docker + Caddy, CI, health/readiness/metrics endpoints, JSON logs, Sentry, nightly backups and DPDP/GDPR data export and deletion",
+    ],
+    outcome: "One product a business can sign up for and run its daily billing on, with GST-ready books its accountant can file from — built as a SaaS the client can sell to many businesses.",
+    gh: "",
+    live: "",
+  },
+  {
     id: "project-kijibestiee",
     t: "KijiBestiee — Bilingual Exam-Prep Platform",
     c: "web",
