@@ -331,6 +331,36 @@ SHOWCASE_PROJECTS = [
         "live": "",
     },
     {
+        "key": "edunest",
+        "order": -160,
+        "title": "EduNest — School ERP SaaS for Web & Android",
+        "cat": "mobile",
+        "desc": (
+            "A multi-tenant school management SaaS: each school signs up, connects its own payment gateway and runs attendance, fees, exams, parents and staff from one system. A FastAPI + PostgreSQL backend serves a single Flutter codebase that ships as both the Android app and the web admin panel, in English and Hindi, for seven roles — admin, principal, teacher, accountant, parent, student and transport. Parents pay fees online straight into the school's own bank account, and alerts reach them by push, SMS, WhatsApp or email."
+        ),
+        "hi": "Multi-school SaaS · One Flutter codebase for Android + web · English & Hindi",
+        "tech": ["FastAPI", "PostgreSQL", "Redis", "Flutter", "Alembic", "Razorpay", "Firebase", "Docker"],
+        "featured": True,
+        "img": "/projects/edunest.webp",
+        "features": [
+            "One Flutter codebase ships the Android app (icon home screen, light and dark themes, fingerprint/face/PIN lock) and the web admin panel with a desktop sidebar, both on one FastAPI + PostgreSQL API",
+            "Fully bilingual: about 690 Hindi strings cover menus, forms, tables, dates and errors; a Hindi phone opens in Hindi, and the server sends each user's notifications in their own language",
+            "Fees settle straight into each school's bank: the school connects its own Razorpay or NTT DATA (Atom) account, with keys encrypted at rest, or takes direct UPI with UTR verification; callbacks are signature-checked, amounts verified and rows locked so nothing is settled twice",
+            "Fee rules for real schools: installments, automatic late fees, sibling discounts, scholarships, refunds and receipt cancellation, with automatic reminders 3 days before the due date and weekly while overdue, sent only between 9 am and 8 pm IST",
+            "Exam office: paper schedules, admit cards, mixed-class seating plans, automatic class results with rank and pass/fail, CBSE-style report cards, and marks entry the server locks to the assigned teacher",
+            "Teachers turn a Word, PDF or text question paper into a timed online quiz: questions, options and answer keys in English or Hindi are detected, and an answer it can't find is left for the teacher, never guessed",
+            "GPS staff attendance: check-in works only inside the campus radius (50 m by default), mock locations are refused, schools can require their own Wi-Fi, and RFID or biometric devices feed a monthly report for payroll",
+            "For parents: live bus tracking with “bus is X min away” alerts, a class diary with photos, the school calendar, progress graphs, PTM booking and parent-teacher chat, with each school choosing which alerts go by push (Firebase), SMS (MSG91 / Twilio), WhatsApp Cloud API or email",
+            "Fast onboarding: Excel / CSV bulk import of students and staff with row-by-row checks and an all-or-nothing import, and one-click promotion to the next academic year, including repeaters and alumni",
+            "Safe for many schools on one platform: every query scoped to the school and tested by calling every endpoint as a second school, server-side permissions for 7 roles, TOTP 2FA, Redis rate limits with account lockout, nightly backups and a startup guard that refuses unsafe production settings, covered by 146 backend and 19 Flutter tests",
+        ],
+        "outcome": (
+            "A school runs its whole day — attendance, fees, exams, transport and parent communication — from one system on the web and on Android, with fees landing in its own bank account, while the platform can be sold to many schools, each fully isolated."
+        ),
+        "gh": "",
+        "live": "",
+    },
+    {
         "key": "kiji-online-test",
         "order": -150,
         "title": "Kiji Technology Online Test — Exam Platform for Web & Mobile",
