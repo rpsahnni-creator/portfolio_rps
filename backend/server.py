@@ -302,6 +302,35 @@ SHOWCASE_PROJECTS = [
         "live": "https://kijibestiee.kijitechnology.in",
     },
     {
+        "key": "srtapp",
+        "order": -175,
+        "title": "SRTAPP — College Management System for Web & Mobile",
+        "cat": "web",
+        "desc": (
+            "A multi-college management platform (ERP) that runs an entire campus, from admission to alumni, behind one sign-in. A Django REST API with PostgreSQL, Redis and Celery powers a Next.js web portal and a Flutter app for Android and iOS with full feature parity, so what the office records on the web, a parent sees on their phone instantly. Each college's data is fully isolated, and every role — principal, teachers, students, parents, accounts, library, admissions and gate security — sees exactly their own work."
+        ),
+        "hi": "Multi-college ERP · Next.js web + Flutter app · 824 automated tests",
+        "tech": ["Django", "Django REST Framework", "Next.js", "Flutter", "PostgreSQL", "Redis", "Celery", "Docker"],
+        "featured": True,
+        "img": "/projects/srtapp.webp",
+        "features": [
+            "One platform for the whole campus: academics and attendance, exams and online tests, fees and accounting, library, admissions and records, HR and payroll, communication, and campus operations (gate, transport, hostel, events)",
+            "Next.js web portal with 170+ screens and live dashboards, all mirrored in the Flutter app — one-tap roll call, timed online tests, fee payment, GPS staff check-in, a digital ID card with a QR code for the gate, and in-app notices",
+            "Role-based access for super admin, college admin, principal/HoD, teacher, student, parent, accountant, librarian, admissions and security — enforced on the server and reflected in each role's menus",
+            "Online fee collection through Razorpay and NTT DATA: the server verifies the gateway's signature and amount, credits each payment exactly once even when the bank retries, and still records late approvals and closed browsers",
+            "Complete library system: barcode circulation, renewals, reservations with automatic holds, fines, acquisitions, a digital repository and a public OPAC, with every stock change run in a transaction with row locks",
+            "NEP 2020 and accreditation ready: Academic Bank of Credits, DigiLocker publishing, SWAYAM/NPTEL credit transfer, CBCS and outcome-based grading, and NAAC/NBA criteria tracking",
+            "AI assistant for the principal that answers questions in English or Hindi, plus early alerts for low attendance, weak performance and fee dues, department analytics and confidential student wellness check-ins",
+            "Security built in: per-college data isolation on every request, optional OTP two-step login, session timeouts, an exportable audit trail, backups and health monitoring",
+            "Production-ready: 824 automated tests, Celery Beat jobs for daily maintenance, Meilisearch, S3-compatible file storage, and Docker + Nginx deployment as SaaS or on the college's own server",
+        ],
+        "outcome": (
+            "A college can move attendance, fees, exams, the library and accreditation paperwork off registers, spreadsheets and WhatsApp onto one system, with staff, students and parents all working from the same live data on the web or their phones."
+        ),
+        "gh": "",
+        "live": "",
+    },
+    {
         "key": "kiji-online-test",
         "order": -150,
         "title": "Kiji Technology Online Test — Exam Platform for Web & Mobile",
